@@ -25,26 +25,10 @@ export async function proxy(request: NextRequest) {
     }
   );
 
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
-
-  // /history פתוח לאורחים (היסטוריה מ-localStorage)
-  const protectedPrefixes = [
-    "/dashboard",
-    "/vehicle",
-    "/favorites",
-    "/settings",
-  ];
-  const isProtected = protectedPrefixes.some((p) =>
-    request.nextUrl.pathname.startsWith(p)
-  );
-
-  if (isProtected && !user) {
-    const loginUrl = request.nextUrl.clone();
-    loginUrl.pathname = "/login";
-    return NextResponse.redirect(loginUrl);
-  }
+  // חשוב: getUser() מרענן את ה-session ומסנכרן את ה-cookies.
+  // אין כאן redirect — הגנת העמודים נעשית ברמת העמוד (רכיב AuthRequired),
+  // כדי לא לתקוע את האורח במלכודת כפתור Back.
+  await supabase.auth.getUser();
 
   return supabaseResponse;
 }
