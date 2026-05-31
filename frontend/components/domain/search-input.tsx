@@ -2,7 +2,7 @@
 
 import { useState, type FormEvent } from "react";
 import { useRouter } from "next/navigation";
-import { Search, Camera } from "lucide-react";
+import { Search } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { validatePlate } from "@/lib/validators";
 
@@ -56,14 +56,6 @@ export function SearchInput({ size = "lg", className }: SearchInputProps) {
           aria-invalid={!!error}
           className="plate-text flex-1 bg-transparent border-0 outline-none text-base text-[var(--color-gray-900)] placeholder:text-[var(--color-gray-400)]"
         />
-        <button
-          type="button"
-          aria-label="צילום לוחית רישוי"
-          title="צילום לוחית — בקרוב"
-          className="w-10 h-10 grid place-items-center rounded-lg text-[var(--color-gray-500)] hover:bg-[var(--color-gray-100)] hover:text-[var(--color-primary-600)] transition-colors"
-        >
-          <Camera size={20} />
-        </button>
         <button
           type="submit"
           className={cn(
