@@ -7,6 +7,7 @@ import { Scale, Check, X } from "lucide-react";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { RiskBadge } from "@/components/domain/risk-badge";
+import { VehicleImage } from "@/components/domain/vehicle-image";
 import { toneFromScore } from "@/lib/risk";
 import { cn } from "@/lib/utils";
 
@@ -81,6 +82,13 @@ export function FavoritesGrid({ items, maxCompare }: Props) {
               </button>
 
               <Link href={`/search/${fav.license_plate}`} className="block">
+                <VehicleImage
+                  manufacturer={fav.manufacturer}
+                  model={fav.model}
+                  year={fav.year}
+                  variant="card"
+                  className="mb-3"
+                />
                 <div className="flex items-start justify-between gap-2 mb-3 ps-8">
                   <div>
                     <p className="font-bold text-[var(--color-gray-900)]">

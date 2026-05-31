@@ -180,7 +180,12 @@ export default async function SearchPage({ params }: SearchPageProps) {
         {/* ===== HEADER / HERO ===== */}
         <div className="space-y-4">
           <div className="relative">
-            <VehicleImage manufacturer={vehicle.manufacturer} model={vehicle.model} />
+            <VehicleImage
+              manufacturer={vehicle.manufacturer}
+              model={vehicle.model}
+              year={vehicle.year}
+              color={vehicle.color}
+            />
             <div className="absolute bottom-3 start-3">
               <ManufacturerLogo
                 slug={vehicle.manufacturerSlug}

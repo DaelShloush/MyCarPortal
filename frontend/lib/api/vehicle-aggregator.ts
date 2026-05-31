@@ -13,6 +13,7 @@ import type {
 import type { Vehicle, Owner, Recall, SafetyFeatures } from "../types";
 import { calculateRisk } from "../risk-calculator";
 import { toneFromScore, labelFromTone } from "../risk";
+import { getManufacturerSlug } from "../manufacturer-logos";
 
 export interface VehicleApiResult {
   vehicle: Vehicle;
@@ -108,7 +109,7 @@ function buildVehicle(params: {
 }): Vehicle {
   const { main, ext, tech, owners: rawOwners, recalls: rawRecalls, hasDisabilityTag, spec, price, importRec, plate } = params;
 
-  const manufacturerSlug = slugify(main.tozeret_nm ?? "");
+  const manufacturerSlug = getManufacturerSlug(main.tozeret_nm ?? "");
   const year = main.shnat_yitzur ?? 0;
   const kmAtLastTest = tech?.kilometer_test_aharon ?? 0;
   const testExpiryDate = main.tokef_dt ? formatDate(main.tokef_dt) : "";
@@ -318,22 +319,6 @@ function countryFromManufacturer(name: string): string {
   return "";
 }
 
-function slugify(name: string): string {
-  const map: Record<string, string> = {
-    "טויוטה": "toyota", "הונדה": "honda", "מזדה": "mazda",
-    "מיצובישי": "mitsubishi", "סובארו": "subaru", "ניסאן": "nissan",
-    "קיה": "kia", "יונדאי": "hyundai",
-    "פולקסווגן": "volkswagen", "אאודי": "audi", "מרצדס": "mercedes-benz",
-    "ב.מ.וו": "bmw", "אופל": "opel",
-    "פורד": "ford", "שברולט": "chevrolet", "ג׳יפ": "jeep", "טסלה": "tesla",
-    "פיאט": "fiat", "סיטרואן": "citroen", "פיג׳ו": "peugeot", "רנו": "renault",
-    "סקודה": "skoda", "וולוו": "volvo", "סיאט": "seat",
-  };
-  for (const [key, slug] of Object.entries(map)) {
-    if (name.includes(key)) return slug;
-  }
-  return name.toLowerCase().replace(/\s+/g, "-");
-}
 
 function formatDate(raw: string | undefined): string {
   if (!raw) return "";

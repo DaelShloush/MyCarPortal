@@ -6,6 +6,7 @@ import { Button } from "@/components/ui/button";
 import { VehicleCard } from "@/components/domain/vehicle-card";
 import { AlertBanner } from "@/components/domain/alert-banner";
 import { createClient } from "@/lib/supabase/server";
+import { getManufacturerSlug } from "@/lib/manufacturer-logos";
 
 export default async function DashboardPage() {
   const supabase = await createClient();
@@ -113,7 +114,7 @@ export default async function DashboardPage() {
                     id: v.id,
                     plate: v.license_plate,
                     manufacturer: v.manufacturer ?? "",
-                    manufacturerSlug: "",
+                    manufacturerSlug: getManufacturerSlug(v.manufacturer ?? ""),
                     manufacturerCountry: "",
                     model: v.model ?? "",
                     year: v.year ?? 0,

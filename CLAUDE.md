@@ -667,6 +667,8 @@ mycarportal/
 - [x] CRUD: favorites, search_history (vehicles — בסיסי)
 - [x] `lib/ad-generator.ts` — מחולל מודעת מכירה (תבנית, ללא AI) + `sale-ad-generator.tsx`
 - [x] נתונים חינמיים נוספים: מספר שלדה (VIN), דגל יבוא אישי (resource 03adc637), אזהרת "רכב ירד מהכביש/מבוטל" (מ-source)
+- [x] תמונת רכב — imagin.studio CGI (`lib/car-image.ts` + `vehicle-image.tsx`): render לפי יצרן/דגם/שנה/צבע, fallback ל-placeholder. מוצג בעמוד חיפוש + כרטיסי דשבורד + מועדפים. customer ברירת מחדל `img` (demo חינמי), ניתן לעקוף ב-`NEXT_PUBLIC_IMAGIN_CUSTOMER`
+- [x] לוגו יצרן אמיתי — avto-dev/vehicle-logotypes דרך `vl.imgix.net` (`manufacturer-logo.tsx`), fallback לאייקון. `getManufacturerSlug` שודרג לזיהוי לפי הכלה (substring) כי `tozeret_nm` כולל סיומות מדינה ("הונדה-ארה\"ב"→honda, "מרוטי-סוזוקי"→suzuki). אוחד עם ה-aggregator (הוסר `slugify` כפול)
 - [x] Upload: Supabase Storage למסמכים (bucket `documents` פרטי + RLS לפי תיקיית user; `documents-manager.tsx`)
 - [x] Notifications: Resend email (`lib/email.ts`) — דורש `RESEND_API_KEY`
 - [x] Cron: `/api/reminders/check` + `vercel.json` (יומי 08:00) — דורש `SUPABASE_SERVICE_ROLE_KEY`

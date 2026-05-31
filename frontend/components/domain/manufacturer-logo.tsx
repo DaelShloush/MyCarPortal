@@ -1,3 +1,6 @@
+"use client";
+
+import { useState } from "react";
 import { Car } from "lucide-react";
 import { cn } from "@/lib/utils";
 
@@ -9,21 +12,39 @@ interface ManufacturerLogoProps {
 }
 
 /**
- * לוגו יצרן — מאחר ולוגואים חיצוניים תלויי-רשת,
- * בשלב ה-static הזה אנחנו מציגים אייקון fallback אחיד.
- * בשלב 8 (Backend) נחבר ל-avto-dev/vehicle-logotypes CDN.
+ * לוגו יצרן מ-avto-dev/vehicle-logotypes (מתארח ב-vl.imgix.net).
+ * נטען לפי slug; אם אין slug או הטעינה נכשלת — fallback לאייקון אחיד.
  */
-export function ManufacturerLogo({ name, size = 40, className }: ManufacturerLogoProps) {
+export function ManufacturerLogo({ slug, name, size = 40, className }: ManufacturerLogoProps) {
+  const [failed, setFailed] = useState(false);
+
+  // imgix: גודל כפול ל-retina, שמירת שקיפות ויחס
+  const px = size * 2;
+  const url = slug
+    ? `https://vl.imgix.net/img/${slug}-logo.png?w=${px}&h=${px}&fit=clip&auto=format`
+    : null;
+
   return (
     <div
       aria-label={name}
       className={cn(
-        "shrink-0 rounded-lg bg-white border border-[var(--color-border)] grid place-items-center text-[var(--color-gray-500)]",
+        "shrink-0 rounded-lg bg-white border border-[var(--color-border)] grid place-items-center text-[var(--color-gray-500)] overflow-hidden",
         className
       )}
       style={{ width: size, height: size }}
     >
-      <Car size={Math.round(size * 0.55)} strokeWidth={2} />
+      {url && !failed ? (
+        // eslint-disable-next-line @next/next/no-img-element
+        <img
+          src={url}
+          alt={name}
+          loading="lazy"
+          onError={() => setFailed(true)}
+          className="w-full h-full object-contain p-1"
+        />
+      ) : (
+        <Car size={Math.round(size * 0.55)} strokeWidth={2} />
+      )}
     </div>
   );
 }

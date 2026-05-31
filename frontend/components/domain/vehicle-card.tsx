@@ -3,6 +3,7 @@ import { Bell, ChevronLeft } from "lucide-react";
 import { Card } from "@/components/ui/card";
 import { Progress } from "@/components/ui/progress";
 import { ManufacturerLogo } from "./manufacturer-logo";
+import { VehicleImage } from "./vehicle-image";
 import type { MyVehicle } from "@/lib/types";
 import { cn } from "@/lib/utils";
 
@@ -22,7 +23,15 @@ export function VehicleCard({ vehicle }: VehicleCardProps) {
   const insurance = daysProgress(vehicle.daysToInsuranceExpiry);
 
   return (
-    <Card className="hover:shadow-[var(--shadow-md)] hover:-translate-y-0.5 transition-all duration-200">
+    <Card className="hover:shadow-[var(--shadow-md)] hover:-translate-y-0.5 transition-all duration-200 overflow-hidden">
+      <VehicleImage
+        manufacturer={vehicle.manufacturer}
+        model={vehicle.model}
+        year={vehicle.year}
+        color={vehicle.color}
+        variant="card"
+        className="rounded-none"
+      />
       <div className="p-4 flex items-start gap-3">
         <ManufacturerLogo
           slug={vehicle.manufacturerSlug}

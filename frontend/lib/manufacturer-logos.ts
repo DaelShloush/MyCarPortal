@@ -73,8 +73,27 @@ const LOGO_MAP: Record<string, string> = {
   "tesla": "tesla",
 };
 
+// מפתחות עבריים, ממוינים מהארוך לקצר — כדי שהתאמת-הכלה תעדיף שם ספציפי
+// (למשל "מרצדס בנץ" לפני "מרצדס") ולא תיתפס על מילה חלקית.
+const HEBREW_KEYS = Object.keys(LOGO_MAP)
+  .filter((k) => /[֐-׿]/.test(k))
+  .sort((a, b) => b.length - a.length);
+
 export function getManufacturerSlug(name: string): string {
   if (!name) return "";
-  const lower = name.toLowerCase().trim();
-  return LOGO_MAP[name] ?? LOGO_MAP[lower] ?? lower.replace(/\s+/g, "-");
+  const trimmed = name.trim();
+  const lower = trimmed.toLowerCase();
+
+  // 1) התאמה מדויקת
+  if (LOGO_MAP[trimmed]) return LOGO_MAP[trimmed];
+  if (LOGO_MAP[lower]) return LOGO_MAP[lower];
+
+  // 2) התאמה לפי הכלה — שמות אמיתיים ב-data.gov.il כוללים סיומות מדינה
+  //    ("הונדה-ארה\"ב", "מרוטי-סוזוקי") שלא יתאימו בהתאמה מדויקת
+  for (const key of HEBREW_KEYS) {
+    if (trimmed.includes(key)) return LOGO_MAP[key];
+  }
+
+  // 3) fallback — ניקוי בסיסי (בד"כ ייכשל ב-CDN ואז ה-UI יציג placeholder)
+  return lower.replace(/\s+/g, "-");
 }

@@ -33,6 +33,7 @@
 | `RESEND_API_KEY` | לתזכורות | שליחת אימייל (Resend) |
 | `RESEND_FROM` | אופציונלי | כתובת שולח (ברירת מחדל onboarding@resend.dev) |
 | `CRON_SECRET` | מומלץ | הקשחת `/api/reminders/check` |
+| `NEXT_PUBLIC_IMAGIN_CUSTOMER` | אופציונלי | מפתח customer ל-imagin.studio (תמונות רכב). ברירת מחדל `img` — demo חינמי עם watermark |
 
 לפיתוח מקומי — הקובץ `.env.local` בתיקיית `frontend/` (לא מועלה ל-git).
 
