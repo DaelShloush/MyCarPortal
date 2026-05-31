@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { redirect } from "next/navigation";
+import { AuthRequired } from "@/components/domain/auth-required";
 import { Star } from "lucide-react";
 import { SiteShell } from "@/components/layout/site-shell";
 import { Button } from "@/components/ui/button";
@@ -9,7 +9,7 @@ import { createClient } from "@/lib/supabase/server";
 export default async function FavoritesPage() {
   const supabase = await createClient();
   const { data: { user } } = await supabase.auth.getUser();
-  if (!user) redirect("/login");
+  if (!user) return <AuthRequired feature="המועדפים שלך" />;
 
   const [favRes, profileRes] = await Promise.all([
     supabase

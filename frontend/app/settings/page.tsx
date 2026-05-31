@@ -1,5 +1,5 @@
-import { redirect } from "next/navigation";
 import { Crown, Bell, Mail, Lock, LogOut, CreditCard, ChevronLeft, CheckCircle, AlertCircle } from "lucide-react";
+import { AuthRequired } from "@/components/domain/auth-required";
 import { SiteShell } from "@/components/layout/site-shell";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -16,7 +16,7 @@ interface SettingsPageProps {
 export default async function SettingsPage({ searchParams }: SettingsPageProps) {
   const supabase = await createClient();
   const { data: { user } } = await supabase.auth.getUser();
-  if (!user) redirect("/login");
+  if (!user) return <AuthRequired feature="ההגדרות" />;
 
   const { data: profile } = await supabase
     .from("profiles")

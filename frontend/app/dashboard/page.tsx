@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { redirect } from "next/navigation";
+import { AuthRequired } from "@/components/domain/auth-required";
 import { Plus, Crown } from "lucide-react";
 import { SiteShell } from "@/components/layout/site-shell";
 import { Button } from "@/components/ui/button";
@@ -11,7 +11,7 @@ import { getManufacturerSlug } from "@/lib/manufacturer-logos";
 export default async function DashboardPage() {
   const supabase = await createClient();
   const { data: { user } } = await supabase.auth.getUser();
-  if (!user) redirect("/login");
+  if (!user) return <AuthRequired feature="הרכבים שלך" />;
 
   const [vehiclesRes, remindersRes, profileRes] = await Promise.all([
     supabase

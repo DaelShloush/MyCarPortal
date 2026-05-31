@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { redirect } from "next/navigation";
+import { AuthRequired } from "@/components/domain/auth-required";
 import {
   Car,
   Wrench,
@@ -76,7 +76,7 @@ export default async function VehicleDetailPage({ params }: VehicleDetailProps) 
   const {
     data: { user },
   } = await supabase.auth.getUser();
-  if (!user) redirect("/login");
+  if (!user) return <AuthRequired feature="הרכב הזה" />;
 
   // fetch all data in parallel
   const [vehicleRes, serviceRes, docsRes, remindersRes, profileRes] = await Promise.all([
