@@ -1,0 +1,38 @@
+# Dependencies
+node_modules/
+
+# Build outputs
+.next/
+out/
+dist/
+
+# Environment variables — NEVER commit these
+.env
+.env.local
+.env.*.local
+
+# Vercel
+.vercel
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Agent / tooling config
+.claude/
+.agents/
+skills-lock.json
+
+# Editor files
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# Word temp files
+~$*.docx
+~$*.doc
+~$*.xlsx
+
+# TypeScript build info
+*.tsbuildinfo

@@ -1,0 +1,125 @@
+<!DOCTYPE html>
+<html lang="he" dir="rtl">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>MyCarPortal — Wireframes</title>
+  <link href="https://fonts.googleapis.com/css2?family=Balsamiq+Sans:ital,wght@0,400;0,700;1,400&display=swap" rel="stylesheet">
+  <script src="https://unpkg.com/react@18.3.1/umd/react.development.js" integrity="sha384-hD6/rw4ppMLGNu3tX5cjIb+uRZ7UkRJ6BPkLpg4hAu/6onKUg4lLsHAs9EBPT82L" crossorigin="anonymous"></script>
+  <script src="https://unpkg.com/react-dom@18.3.1/umd/react-dom.development.js" integrity="sha384-u6aeetuaXnQ38mYT8rp6sbXaQe3NL9t+IBXmnYxwkUI2Hw4bsp2Wvmx4yRQF1uAm" crossorigin="anonymous"></script>
+  <script src="https://unpkg.com/@babel/standalone@7.29.0/babel.min.js" integrity="sha384-m08KidiNqLdpJqLq95G/LEi8Qvjl/xUYll3QILypMoQ65QorJ9Lvtp2RXYGBFj1y" crossorigin="anonymous"></script>
+  <script type="text/babel" src="design-canvas.jsx"></script>
+  <script type="text/babel" src="wf-primitives.jsx"></script>
+  <script type="text/babel" src="wf-screens.jsx"></script>
+  <script type="text/babel" src="wf-screens-desktop.jsx"></script>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body { background: #f0ede8; font-family: 'Balsamiq Sans', cursive; }
+    #root { width: 100vw; height: 100vh; }
+  </style>
+</head>
+<body>
+<div id="root"></div>
+<script type="text/babel">
+const App = () => (
+  <DesignCanvas title="MyCarPortal — Wireframes">
+
+    {/* ─── 1. LANDING PAGE ─── */}
+    <DCSection id="landing" title="🏠 Landing Page">
+      <DCArtboard id="l-desktop" label="Desktop — 1280px" width={1280} height={900}>
+        <DesktopLanding />
+      </DCArtboard>
+      <DCArtboard id="l-mobile" label="Mobile — 390px" width={390} height={760}>
+        <LandingA />
+      </DCArtboard>
+    </DCSection>
+
+    {/* ─── 2. SEARCH RESULTS ─── */}
+    <DCSection id="search" title="🔍 עמוד תוצאות חיפוש">
+      <DCArtboard id="s-desktop" label="Desktop — Sidebar + 2-col sections" width={1280} height={820}>
+        <DesktopSearch />
+      </DCArtboard>
+      <DCArtboard id="s-mobile" label="Mobile — Single page scroll" width={390} height={1600}>
+        <SearchA />
+      </DCArtboard>
+    </DCSection>
+
+    {/* ─── 3. ONBOARDING FLOW ─── */}
+    <DCSection id="onboarding" title="🚀 Onboarding Flow">
+      <DCArtboard id="ob-desktop" label="Desktop — Centered card, 4 שלבים" width={1280} height={600}>
+        <DesktopLogin />
+      </DCArtboard>
+      <DCArtboard id="ob-mobile" label="Mobile — 4 שלבים (Email flow)" width={1140} height={560}>
+        <div style={{display:'flex', gap:12, padding:16, alignItems:'flex-start', justifyContent:'center'}}>
+          <OnboardingA />
+        </div>
+      </DCArtboard>
+    </DCSection>
+
+    {/* ─── 4. DASHBOARD ─── */}
+    <DCSection id="dashboard" title="🚗 Dashboard — הרכבים שלי">
+      <DCArtboard id="d-desktop" label="Desktop — Sidebar + 3-col grid" width={1280} height={720}>
+        <DesktopDashboard />
+      </DCArtboard>
+      <DCArtboard id="d-mobile" label="Mobile — Alert + כרטיסי רכב" width={390} height={660}>
+        <DashboardA />
+      </DCArtboard>
+    </DCSection>
+
+    {/* ─── 5. VEHICLE DETAIL ─── */}
+    <DCSection id="vehicle" title="📋 עמוד רכב אישי">
+      <DCArtboard id="v-desktop" label="Desktop — Left panel + Tabs + Timeline" width={1280} height={760}>
+        <DesktopVehicleDetail />
+      </DCArtboard>
+      <DCArtboard id="v-mobile" label="Mobile — Tabs + היסטוריית טיפולים" width={390} height={780}>
+        <VehicleDetailA />
+      </DCArtboard>
+    </DCSection>
+
+    {/* ─── 6. FAVORITES ─── */}
+    <DCSection id="favorites" title="⭐ מועדפים והשוואה">
+      <DCArtboard id="f-desktop" label="Desktop — רשימה + טבלת השוואה" width={1280} height={720}>
+        <DesktopFavorites />
+      </DCArtboard>
+      <DCArtboard id="f-mobile" label="Mobile — רשימת מועדפים" width={390} height={680}>
+        <FavoritesA />
+      </DCArtboard>
+    </DCSection>
+
+    {/* ─── 7. AUTH ─── */}
+    <DCSection id="auth" title="🔐 Auth — כניסה והרשמה">
+      <DCArtboard id="a-desktop" label="Desktop — Split: Marketing + Form" width={1280} height={660}>
+        <DesktopLogin />
+      </DCArtboard>
+      <DCArtboard id="a-mobile" label="Mobile — Login" width={390} height={520}>
+        <LoginScreen />
+      </DCArtboard>
+    </DCSection>
+
+    {/* ─── 8. SALE AD GENERATOR ─── */}
+    <DCSection id="sale" title="📝 מודעת מכירה אוטומטית">
+      <DCArtboard id="sa-desktop" label="Desktop — טופס + תצוגה מקדימה side by side" width={1280} height={720}>
+        <DesktopSaleAd />
+      </DCArtboard>
+      <DCArtboard id="sa-mobile" label="Mobile — טופס יצירת מודעה" width={390} height={700}>
+        <SaleAdForm />
+      </DCArtboard>
+    </DCSection>
+
+    {/* ─── 9. SETTINGS ─── */}
+    <DCSection id="settings" title="⚙️ הגדרות">
+      <DCArtboard id="set-desktop" label="Desktop — 2-col: פרופיל + התראות" width={1280} height={680}>
+        <DesktopSettings />
+      </DCArtboard>
+      <DCArtboard id="set-mobile" label="Mobile — הגדרות" width={390} height={700}>
+        <SettingsScreen />
+      </DCArtboard>
+    </DCSection>
+
+  </DesignCanvas>
+);
+
+ReactDOM.createRoot(document.getElementById('root')).render(<App />);
+</script>
+</body>
+</html>
