@@ -10,6 +10,7 @@ export const RESOURCES = {
   INACTIVE_VEHICLES: "f6efe89a-fb3d-43a4-bb61-9bf12a9b9099",
   DECOMMISSIONED:    "851ecab1-0622-4dbe-a6c7-f950cf82abf9",
   PERSONAL_IMPORT:   "03adc637-b6fe-402b-9937-7c3d3afc9140",
+  MODEL_QUANTITIES:  "5e87a7a1-2f6f-41c1-8aec-7216d52a6cf6",
 } as const;
 
 export const DATA_GOV_BASE = "https://data.gov.il/api/3/action/datastore_search";

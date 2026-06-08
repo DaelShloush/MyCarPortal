@@ -9,6 +9,7 @@ import type {
   ModelSpecRecord,
   PriceRecord,
   PersonalImportRecord,
+  ModelQuantityRecord,
 } from "./data-gov";
 import type { Vehicle, Owner, Recall, SafetyFeatures } from "../types";
 import { getManufacturerSlug } from "../manufacturer-logos";
@@ -62,8 +63,8 @@ export async function fetchVehicleByPlate(
   const hasDisabilityTag = disabilityRecords.length > 0;
   const importRec = importRecords[0] as unknown as PersonalImportRecord | undefined;
 
-  // Calls 7+8 — model specs + official price (depend on main, run in parallel)
-  const [specRecords, priceRecords] = await Promise.all([
+  // Calls 7-9 — model specs + official price + quantities (depend on main, run in parallel)
+  const [specRecords, priceRecords, quantityRecords] = await Promise.all([
     queryDataGov(
       RESOURCES.MODEL_SPECS,
       {
@@ -82,12 +83,35 @@ export async function fetchVehicleByPlate(
       },
       1
     ).catch(() => []),
+    // כל שנות הייצור של הדגם — נסכום לפופולריות + שיעור הישרדות
+    queryDataGov(
+      RESOURCES.MODEL_QUANTITIES,
+      {
+        tozeret_cd: main.tozeret_cd,
+        degem_cd: main.degem_cd,
+      },
+      100
+    ).catch(() => []),
   ]);
   const spec = specRecords[0] as unknown as ModelSpecRecord | undefined;
   const price = priceRecords[0] as unknown as PriceRecord | undefined;
 
   const vehicle = buildVehicle({ main, ext, tech, owners, recalls, hasDisabilityTag, spec, price, importRec, plate });
   vehicle.status = source;
+
+  // פופולריות ואמינות הדגם — סכום פעילים/לא-פעילים על פני כל שנות הייצור
+  const quantities = quantityRecords as unknown as ModelQuantityRecord[];
+  if (quantities.length > 0) {
+    const sum = (key: keyof ModelQuantityRecord) =>
+      quantities.reduce((acc, r) => acc + (Number(r[key]) || 0), 0);
+    const active = sum("mispar_rechavim_pailim");
+    const inactive = sum("mispar_rechavim_le_pailim");
+    if (active + inactive > 0) {
+      vehicle.modelActiveCount = active;
+      vehicle.modelInactiveCount = inactive;
+    }
+  }
+
   return { source, vehicle };
 }
 

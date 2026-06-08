@@ -104,6 +104,9 @@ export interface Vehicle {
   status?: "active" | "inactive" | "decommissioned";
   // image
   imageUrl?: string;
+  // פופולריות ואמינות הדגם (מ-dataset כמויות לפי דגם)
+  modelActiveCount?: number;    // כמה מהדגם פעילים על הכביש
+  modelInactiveCount?: number;  // כמה ירדו מהכביש
 }
 
 // Vehicle — מצב ניהול עבור משתמש מחובר

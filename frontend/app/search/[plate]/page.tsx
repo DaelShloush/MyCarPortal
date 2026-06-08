@@ -167,6 +167,28 @@ export default async function SearchPage({ params }: SearchPageProps) {
     return expiry.getTime() < Date.now();
   })();
 
+  // ===== פופולריות ואמינות הדגם =====
+  const depreciationPct =
+    vehicle.originalPrice && valueEstimate
+      ? Math.round((1 - valueEstimate.mid / vehicle.originalPrice) * 100)
+      : null;
+
+  const totalEverMade =
+    vehicle.modelActiveCount != null && vehicle.modelInactiveCount != null
+      ? vehicle.modelActiveCount + vehicle.modelInactiveCount
+      : 0;
+  const survivalPct =
+    totalEverMade > 0 ? Math.round((vehicle.modelActiveCount! / totalEverMade) * 100) : null;
+
+  const popularity = (() => {
+    const n = vehicle.modelActiveCount;
+    if (n == null) return null;
+    if (n >= 50000) return { label: "נפוץ מאוד", variant: "success" as const };
+    if (n >= 10000) return { label: "נפוץ", variant: "success" as const };
+    if (n >= 2000) return { label: "נפוצות בינונית", variant: "default" as const };
+    return { label: "נדיר", variant: "warning" as const };
+  })();
+
   // בדיקת מצב מועדפים (שמירת ההיסטוריה מתבצעת ב-SearchHistoryTracker)
   const supabase = await createClient();
   const { data: { user } } = await supabase.auth.getUser();
@@ -433,6 +455,68 @@ export default async function SearchPage({ params }: SearchPageProps) {
             </div>
           </Section>
         ) : null}
+
+        {/* ===== פופולריות ואמינות הדגם ===== */}
+        {(vehicle.modelActiveCount != null || depreciationPct != null) && (
+          <Section title="פופולריות ואמינות הדגם" icon={<Users size={16} />}>
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+              {vehicle.modelActiveCount != null && (
+                <div className="rounded-xl border border-[var(--color-border)] p-4 text-center">
+                  <p className="text-2xl font-black text-[var(--color-primary-700)]">
+                    {vehicle.modelActiveCount.toLocaleString()}
+                  </p>
+                  <p className="text-xs text-[var(--color-text-subtle)] mt-1">
+                    מהדגם על הכביש בישראל
+                  </p>
+                  {popularity && (
+                    <Badge variant={popularity.variant} className="mt-2">
+                      {popularity.label}
+                    </Badge>
+                  )}
+                </div>
+              )}
+
+              {survivalPct != null && (
+                <div className="rounded-xl border border-[var(--color-border)] p-4 text-center">
+                  <p
+                    className={`text-2xl font-black ${
+                      survivalPct >= 85
+                        ? "text-[var(--color-success)]"
+                        : "text-[var(--color-gray-900)]"
+                    }`}
+                  >
+                    {survivalPct}%
+                  </p>
+                  <p className="text-xs text-[var(--color-text-subtle)] mt-1">
+                    מהדגם עדיין פעילים
+                  </p>
+                  <p className="text-[11px] text-[var(--color-text-muted)] mt-1.5">
+                    {vehicle.modelActiveCount!.toLocaleString()} פעילים ·{" "}
+                    {vehicle.modelInactiveCount!.toLocaleString()} ירדו מהכביש
+                  </p>
+                </div>
+              )}
+
+              {depreciationPct != null && (
+                <div className="rounded-xl border border-[var(--color-border)] p-4 text-center">
+                  <p className="text-2xl font-black text-[var(--color-gray-900)]">
+                    {depreciationPct > 0 ? `${depreciationPct}%` : "—"}
+                  </p>
+                  <p className="text-xs text-[var(--color-text-subtle)] mt-1">
+                    ירידת ערך מהמחיר המקורי
+                  </p>
+                  <p className="text-[11px] text-[var(--color-text-muted)] mt-1.5">
+                    משוער לפי שנה וקילומטראז׳
+                  </p>
+                </div>
+              )}
+            </div>
+            <p className="text-[11px] text-[var(--color-text-subtle)] mt-3 leading-tight">
+              מבוסס על מאגר כמויות הרכבים של משרד התחבורה (כל שנות הייצור של הדגם).
+              שיעור הישרדות גבוה = הדגם מאריך-חיים; כמות גבוהה = זמינות חלפים ושירות טובה יותר.
+            </p>
+          </Section>
+        )}
 
         {/* ===== 1. פרטים כלליים ===== */}
         <Section title="פרטים כלליים" icon={<Info size={16} />}>

@@ -168,3 +168,12 @@ export interface PriceRecord {
   mehir: number; // מחיר מחירון בש"ח
   kinuy_mishari: string;
 }
+
+// כמויות רכבים לפי דגם (resource 5e87a7a1) — שורה לכל שנת ייצור
+export interface ModelQuantityRecord {
+  tozeret_cd: number;
+  degem_cd: number;
+  shnat_yitzur: number;
+  mispar_rechavim_pailim: number;     // פעילים
+  mispar_rechavim_le_pailim: number;  // לא-פעילים (ירדו מהכביש)
+}
