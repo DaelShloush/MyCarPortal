@@ -36,3 +36,9 @@ skills-lock.json
 
 # TypeScript build info
 *.tsbuildinfo
+
+# הגשה — קבצים שאינם חלק מה-repo הסופי (נשמרים מקומית)
+homework/
+MyCarPortal-wireframe/
+CLAUDE.md
+AGENTS.md
