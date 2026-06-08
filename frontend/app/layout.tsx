@@ -1,6 +1,8 @@
 import type { Metadata, Viewport } from "next";
 import { Heebo } from "next/font/google";
 import "./globals.css";
+import { Analytics } from "@vercel/analytics/next";
+import { SpeedInsights } from "@vercel/speed-insights/next";
 import { PwaRegister } from "@/components/pwa-register";
 
 const heebo = Heebo({
@@ -51,6 +53,8 @@ export default function RootLayout({
       <body className="min-h-full bg-[var(--color-bg)] text-[var(--color-text)] font-sans flex flex-col">
         {children}
         <PwaRegister />
+        <Analytics />
+        <SpeedInsights />
       </body>
     </html>
   );

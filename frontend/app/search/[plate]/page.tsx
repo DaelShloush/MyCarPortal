@@ -175,8 +175,26 @@ export default async function SearchPage({ params }: SearchPageProps) {
     initialIsFavorite = await isFavoriteAction(plate);
   }
 
+  // נתוני מבנה (Schema.org) — לתצוגה עשירה ב-Google
+  const jsonLd = {
+    "@context": "https://schema.org",
+    "@type": "Car",
+    name: `${vehicle.manufacturer} ${vehicle.model} ${vehicle.year || ""}`.trim(),
+    brand: { "@type": "Brand", name: vehicle.manufacturer },
+    model: vehicle.model,
+    ...(vehicle.year ? { vehicleModelDate: String(vehicle.year) } : {}),
+    ...(vehicle.color ? { color: vehicle.color } : {}),
+    ...(vehicle.fuelType ? { fuelType: vehicle.fuelType } : {}),
+    ...(vehicle.engineCC ? { vehicleEngine: { "@type": "EngineSpecification", engineDisplacement: { "@type": "QuantitativeValue", value: vehicle.engineCC, unitCode: "CMQ" } } } : {}),
+    ...(vehicle.chassis ? { vehicleIdentificationNumber: vehicle.chassis } : {}),
+  };
+
   return (
     <SiteShell>
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
+      />
       <SearchHistoryTracker
         isLoggedIn={!!user}
         item={{
