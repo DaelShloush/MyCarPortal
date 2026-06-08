@@ -158,6 +158,49 @@ body {
 }
 
 /* ============================================================
+   Branded search loader
+   ============================================================ */
+
+/* הלוגו "נוהג" — תנודה עדינה למעלה/למטה עם נטייה קלה */
+@keyframes mcp-drive {
+  0%, 100% { transform: translateY(0) rotate(0deg); }
+  30%      { transform: translateY(-4px) rotate(-3deg); }
+  70%      { transform: translateY(-2px) rotate(3deg); }
+}
+.mcp-drive {
+  animation: mcp-drive 1.4s ease-in-out infinite;
+}
+
+/* פס "כביש" עם קווים מקווקווים שזזים */
+@keyframes mcp-road {
+  from { background-position: 0 0; }
+  to   { background-position: 28px 0; }
+}
+.mcp-road {
+  background-image: repeating-linear-gradient(
+    90deg,
+    var(--color-primary-400) 0 14px,
+    transparent 14px 28px
+  );
+  background-size: 28px 100%;
+  opacity: 0.55;
+  animation: mcp-road 0.55s linear infinite;
+}
+
+/* שלוש נקודות שמהבהבות בתורן */
+@keyframes mcp-dots {
+  0%, 80%, 100% { opacity: 0.25; }
+  40%           { opacity: 1; }
+}
+.mcp-dot {
+  animation: mcp-dots 1.2s ease-in-out infinite;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .mcp-drive, .mcp-road, .mcp-dot { animation: none; }
+}
+
+/* ============================================================
    Focus styles — accessibility
    ============================================================ */
 

@@ -1,56 +1,35 @@
+import { Car } from "lucide-react";
 import { SiteShell } from "@/components/layout/site-shell";
-
-function SkeletonBox({ className = "" }: { className?: string }) {
-  return (
-    <div
-      className={`animate-pulse rounded-lg bg-[var(--color-gray-200)] ${className}`}
-    />
-  );
-}
-
-function SkeletonSection() {
-  return (
-    <div className="rounded-xl border border-[var(--color-border)] p-5 space-y-3">
-      <SkeletonBox className="h-5 w-40" />
-      <div className="grid grid-cols-1 sm:grid-cols-2 gap-x-6 gap-y-3">
-        {Array.from({ length: 6 }).map((_, i) => (
-          <div key={i} className="flex justify-between">
-            <SkeletonBox className="h-4 w-24" />
-            <SkeletonBox className="h-4 w-20" />
-          </div>
-        ))}
-      </div>
-    </div>
-  );
-}
 
 export default function SearchLoading() {
   return (
     <SiteShell>
-      <div className="mx-auto max-w-[920px] px-4 md:px-6 py-4 md:py-8 space-y-6">
-        {/* תמונת רכב */}
-        <SkeletonBox className="h-48 md:h-64 w-full" />
-
-        {/* כותרת */}
-        <div className="space-y-2">
-          <SkeletonBox className="h-8 w-2/3" />
-          <SkeletonBox className="h-4 w-1/2" />
+      <div className="mx-auto max-w-[920px] px-4 min-h-[68vh] flex flex-col items-center justify-center text-center">
+        {/* לוגו + טבעת מסתובבת */}
+        <div className="relative w-28 h-28 grid place-items-center mb-6">
+          <div className="absolute inset-0 rounded-full border-4 border-[var(--color-primary-100)] border-t-[var(--color-primary-600)] animate-spin" />
+          <div className="mcp-drive w-16 h-16 rounded-2xl bg-[var(--color-primary-700)] grid place-items-center text-white shadow-[var(--shadow-md)]">
+            <Car size={32} strokeWidth={2.5} />
+          </div>
         </div>
 
-        {/* כפתורי פעולה */}
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-2">
-          {Array.from({ length: 4 }).map((_, i) => (
-            <SkeletonBox key={i} className="h-9" />
-          ))}
-        </div>
+        {/* שם המותג */}
+        <span className="text-xl font-black text-[var(--color-gray-900)]">
+          MyCarPortal
+        </span>
 
-        {/* סקשנים */}
-        <SkeletonSection />
-        <SkeletonSection />
-        <SkeletonSection />
+        {/* פס "כביש" נע */}
+        <div className="mcp-road mt-5 h-1.5 w-48 rounded-full" aria-hidden />
 
-        <p className="text-center text-sm text-[var(--color-text-subtle)] pt-2">
-          טוען נתונים ממאגרי משרד התחבורה…
+        {/* הודעת טעינה עם נקודות מונפשות */}
+        <p className="mt-5 text-sm font-medium text-[var(--color-gray-700)]" aria-live="polite">
+          טוען נתונים ממאגרי משרד התחבורה
+          <span className="mcp-dot">.</span>
+          <span className="mcp-dot" style={{ animationDelay: "0.2s" }}>.</span>
+          <span className="mcp-dot" style={{ animationDelay: "0.4s" }}>.</span>
+        </p>
+        <p className="mt-1 text-xs text-[var(--color-text-subtle)]">
+          שולף מ-6 מאגרים במקביל — עוד רגע
         </p>
       </div>
     </SiteShell>
