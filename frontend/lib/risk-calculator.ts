@@ -43,6 +43,7 @@ function scoreFrequency(owners: Owner[]): number {
 
 // 0-15: vehicle age
 function scoreAge(year: number): number {
+  if (!year) return 0; // שנה לא ידועה — לא מענישים (אחרת age ענק = 15)
   const age = new Date().getFullYear() - year;
   if (age <= 3) return 0;
   if (age <= 7) return 5;
@@ -72,10 +73,10 @@ function scoreKm(km: number, year: number): number {
   if (!km || !year) return 0;
   const age = Math.max(1, new Date().getFullYear() - year);
   const kmPerYear = km / age;
-  if (kmPerYear < 5000) return 8;      // suspiciously low
-  if (kmPerYear <= 20000) return 0;    // normal
+  if (kmPerYear < 5000) return 15;     // חשוד מאוד (לפי המפרט: <5K = 15)
+  if (kmPerYear <= 20000) return 0;    // סביר
   if (kmPerYear <= 30000) return 8;
-  return 15;
+  return 15;                           // >30K
 }
 
 // 0-10: open recalls

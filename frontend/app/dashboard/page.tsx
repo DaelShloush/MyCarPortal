@@ -17,10 +17,12 @@ export default async function DashboardPage() {
     supabase
       .from("vehicles")
       .select("*")
+      .eq("user_id", user.id)
       .order("added_at", { ascending: false }),
     supabase
       .from("reminders")
       .select("*")
+      .eq("user_id", user.id)
       .gte("due_date", new Date().toISOString().split("T")[0])
       .order("due_date", { ascending: true })
       .limit(5),
@@ -147,7 +149,7 @@ export default async function DashboardPage() {
                       emergencyBrake: false, blindSpot: false, autoLights: false, safetyScore: 0 },
                     greenScore: 0, pollutionGroup: 0, co2: 0, nox: 0,
                     tireFront: "", tireRear: "", loadFront: 0, speedRating: "",
-                    hasDisabilityTag: v.has_open_recalls ?? false,
+                    hasDisabilityTag: false,
                     riskBreakdown: { ownership: 0, frequency: 0, age: 0, test: 0,
                       km: 0, structural: 0, recalls: 0, ownerType: 0 },
                   } as Parameters<typeof VehicleCard>[0]["vehicle"]}

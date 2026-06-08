@@ -176,7 +176,7 @@ export default async function SettingsPage({ searchParams }: SettingsPageProps) 
                   >
                     <div
                       className={`w-5 h-5 rounded-full bg-white shadow transition-transform ${
-                        active ? "translate-x-0" : "translate-x-5 rtl:-translate-x-5"
+                        active ? "translate-x-5 rtl:-translate-x-5" : "translate-x-0"
                       }`}
                     />
                   </div>

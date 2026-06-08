@@ -204,8 +204,12 @@ export default async function SearchPage({ params }: SearchPageProps) {
               <p className="text-sm text-[var(--color-text-subtle)] flex flex-wrap items-center gap-x-2 gap-y-1">
                 <span className="plate-text font-bold">{vehicle.plate}</span>
                 <span>·</span>
-                <span>יד {vehicle.yad}</span>
-                <span>·</span>
+                {vehicle.yad > 0 && (
+                  <>
+                    <span>יד {vehicle.yad}</span>
+                    <span>·</span>
+                  </>
+                )}
                 <span>{vehicle.color}</span>
                 <span>·</span>
                 <span>{vehicle.fuelType}</span>
@@ -431,17 +435,26 @@ export default async function SearchPage({ params }: SearchPageProps) {
 
         {/* ===== 3. בעלויות ===== */}
         <Section title="בעלויות" icon={<Users size={16} />}>
-          <div className="mb-4 flex items-center gap-2">
-            <span className="text-sm text-[var(--color-text-subtle)]">מספר בעלים:</span>
-            <span className="text-2xl font-black text-[var(--color-primary-700)]">
-              {vehicle.owners.length}
-            </span>
-          </div>
-          <OwnershipTimeline owners={vehicle.owners} />
-          {vehicle.owners[0]?.type === "החכר (ליסינג)" && (
-            <p className="mt-4 text-xs text-[var(--color-warning)] flex items-center gap-1">
-              <AlertTriangle size={14} />
-              הרכב התחיל את חייו כליסינג — שווה לבדוק קילומטראז׳
+          {vehicle.owners.length > 0 ? (
+            <>
+              <div className="mb-4 flex items-center gap-2">
+                <span className="text-sm text-[var(--color-text-subtle)]">מספר בעלים:</span>
+                <span className="text-2xl font-black text-[var(--color-primary-700)]">
+                  {vehicle.owners.length}
+                </span>
+              </div>
+              <OwnershipTimeline owners={vehicle.owners} />
+              {vehicle.owners[0]?.type === "החכר (ליסינג)" && (
+                <p className="mt-4 text-xs text-[var(--color-warning)] flex items-center gap-1">
+                  <AlertTriangle size={14} />
+                  הרכב התחיל את חייו כליסינג — שווה לבדוק קילומטראז׳
+                </p>
+              )}
+            </>
+          ) : (
+            <p className="text-sm text-[var(--color-text-subtle)] flex items-start gap-1.5">
+              <Info size={15} className="shrink-0 mt-0.5" />
+              היסטוריית בעלויות זמינה רק לרכבים מ-2017 ואילך. עבור רכב זה אין נתוני בעלויות במאגר.
             </p>
           )}
         </Section>

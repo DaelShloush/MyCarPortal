@@ -80,7 +80,7 @@ export default async function ComparePage({ searchParams }: ComparePageProps) {
   // שורות ההשוואה
   const rows: { label: string; render: (v: Vehicle) => React.ReactNode }[] = [
     { label: "שנת ייצור", render: (v) => v.year || "—" },
-    { label: "יד (בעלים)", render: (v) => v.yad },
+    { label: "יד (בעלים)", render: (v) => (v.yad > 0 ? v.yad : "—") },
     { label: 'ק"מ אחרון', render: (v) => fmt(v.kmAtLastTest) },
     {
       label: "מחיר מחירון מקורי",

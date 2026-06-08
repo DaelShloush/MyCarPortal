@@ -22,6 +22,17 @@ export async function addServiceRecordAction(
     redirect(`/vehicle/${vehicleId}?error=missing_fields`);
   }
 
+  // ודא שהרכב שייך למשתמש לפני שמוסיפים טיפול (defense-in-depth מעבר ל-RLS)
+  const { data: ownedVehicle } = await supabase
+    .from("vehicles")
+    .select("id")
+    .eq("id", vehicleId)
+    .eq("user_id", user.id)
+    .maybeSingle();
+  if (!ownedVehicle) {
+    redirect(`/vehicle/${vehicleId}?error=not_authorized`);
+  }
+
   const cost = parseInt(formData.get("cost") as string) || 0;
   const kmAtService = parseInt(formData.get("km_at_service") as string) || 0;
   const garageName = (formData.get("garage_name") as string)?.trim() || null;

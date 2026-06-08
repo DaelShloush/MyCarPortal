@@ -23,15 +23,14 @@ export function Footer() {
             <li><Link href="/" className="hover:text-white">חיפוש רכב</Link></li>
             <li><Link href="/dashboard" className="hover:text-white">הרכבים שלי</Link></li>
             <li><Link href="/favorites" className="hover:text-white">מועדפים</Link></li>
-            <li><Link href="/pricing" className="hover:text-white">מחירים</Link></li>
+            <li><Link href="/compare" className="hover:text-white">השוואת רכבים</Link></li>
           </ul>
         </div>
 
         <div>
           <h4 className="text-sm font-bold text-white mb-3">החברה</h4>
           <ul className="space-y-2 text-sm">
-            <li><Link href="/about" className="hover:text-white">אודות</Link></li>
-            <li><Link href="/contact" className="hover:text-white">צור קשר</Link></li>
+            <li><Link href="/history" className="hover:text-white">היסטוריית חיפושים</Link></li>
             <li><Link href="/privacy" className="hover:text-white">פרטיות</Link></li>
             <li><Link href="/terms" className="hover:text-white">תנאי שימוש</Link></li>
           </ul>

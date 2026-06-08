@@ -46,6 +46,27 @@ export async function toggleFavoriteAction(
     return { ok: true, message: "הוסר מהמועדפים" };
   }
 
+  // אכיפת מגבלת תוכנית — חינם עד 5 מועדפים, פרמיום ללא הגבלה
+  const { data: profile } = await supabase
+    .from("profiles")
+    .select("plan")
+    .eq("id", user.id)
+    .single();
+  const isPremium = profile?.plan === "premium";
+
+  if (!isPremium) {
+    const { count } = await supabase
+      .from("favorites")
+      .select("id", { count: "exact", head: true })
+      .eq("user_id", user.id);
+    if ((count ?? 0) >= 5) {
+      return {
+        ok: false,
+        message: "הגעת למגבלת 5 מועדפים בגרסה החינמית. שדרג לפרמיום למועדפים ללא הגבלה.",
+      };
+    }
+  }
+
   const { error } = await supabase.from("favorites").insert({
     user_id: user.id,
     license_plate: plate,

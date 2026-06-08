@@ -194,7 +194,7 @@ export default async function VehicleDetailPage({ params }: VehicleDetailProps) 
                 </span>
               </p>
             </div>
-            {vehicle.owner_count != null && (
+            {vehicle.owner_count != null && vehicle.owner_count > 0 && (
               <Badge variant="primary">יד {vehicle.owner_count}</Badge>
             )}
           </div>
