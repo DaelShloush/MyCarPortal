@@ -68,7 +68,9 @@ export function VehicleImage({
           <img
             src={url}
             alt={`${manufacturer} ${model}${year ? ` ${year}` : ""}`}
-            loading="lazy"
+            loading={variant === "hero" ? "eager" : "lazy"}
+            fetchPriority={variant === "hero" ? "high" : "auto"}
+            decoding="async"
             onLoad={() => setLoaded(true)}
             onError={() => setFailed(true)}
             className={cn(

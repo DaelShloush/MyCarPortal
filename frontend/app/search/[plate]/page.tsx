@@ -1,3 +1,5 @@
+import type { Metadata } from "next";
+import { cache } from "react";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import {
@@ -29,9 +31,73 @@ import { createClient } from "@/lib/supabase/server";
 import { isFavoriteAction } from "@/app/actions/favorites";
 import { estimateCurrentValue } from "@/lib/value-estimator";
 import { estimateCosts } from "@/lib/cost-estimator";
+import { buildCarImageUrl } from "@/lib/car-image";
 
 interface SearchPageProps {
   params: Promise<{ plate: string }>;
+}
+
+// עטיפת cache — generateMetadata והעמוד חולקים שליפה אחת לכל בקשה
+const getVehicle = cache((plate: string) => fetchVehicleByPlate(plate));
+
+export async function generateMetadata({ params }: SearchPageProps): Promise<Metadata> {
+  const { plate } = await params;
+  if (!plate || !/^\d{5,8}$/.test(plate)) {
+    return { title: "חיפוש רכב | MyCarPortal" };
+  }
+
+  let result: Awaited<ReturnType<typeof fetchVehicleByPlate>> = null;
+  try {
+    result = await getVehicle(plate);
+  } catch {
+    /* נשתמש בכותרת ברירת מחדל */
+  }
+
+  if (!result) {
+    return {
+      title: `רכב ${plate} לא נמצא | MyCarPortal`,
+      description: "מספר הרישוי לא נמצא במאגרי משרד התחבורה.",
+    };
+  }
+
+  const { vehicle } = result;
+  const name = `${vehicle.manufacturer} ${vehicle.model} ${vehicle.year || ""}`.trim();
+  const title = `${name} — בדיקת רכב | MyCarPortal`;
+  const bits = [
+    vehicle.fuelType,
+    vehicle.testExpiryDate ? `טסט בתוקף עד ${vehicle.testExpiryDate}` : null,
+    vehicle.recalls?.some((r) => r.open) ? "⚠️ ריקול פתוח" : null,
+  ].filter(Boolean);
+  const description =
+    `בדיקת ${name} (${plate}) — היסטוריית בעלויות, טסט, ריקולים, בטיחות והערכת שווי ממאגרי משרד התחבורה.` +
+    (bits.length ? ` ${bits.join(" · ")}.` : "");
+
+  const image = buildCarImageUrl({
+    manufacturer: vehicle.manufacturer,
+    model: vehicle.model,
+    year: vehicle.year,
+    color: vehicle.color,
+    width: 1200,
+  });
+
+  return {
+    title,
+    description,
+    openGraph: {
+      title,
+      description,
+      type: "website",
+      locale: "he_IL",
+      siteName: "MyCarPortal",
+      images: image ? [{ url: image, width: 1200, height: 675, alt: name }] : undefined,
+    },
+    twitter: {
+      card: image ? "summary_large_image" : "summary",
+      title,
+      description,
+      images: image ? [image] : undefined,
+    },
+  };
 }
 
 export default async function SearchPage({ params }: SearchPageProps) {
@@ -43,7 +109,7 @@ export default async function SearchPage({ params }: SearchPageProps) {
   let apiError = false;
 
   try {
-    result = await fetchVehicleByPlate(plate);
+    result = await getVehicle(plate);
   } catch {
     apiError = true;
   }

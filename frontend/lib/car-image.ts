@@ -33,16 +33,38 @@ function mapColor(color?: string | null): string | undefined {
   return undefined; // לא זוהה — נשאיר ל-imagin לבחור צבע ברירת מחדל
 }
 
-// kinuy_mishari לרוב כבר באנגלית ("COROLLA", "C CLASS"). מנקים לפורמט modelFamily.
-function normalizeModel(model?: string | null): string | undefined {
+// kinuy_mishari לרוב כבר באנגלית ("COROLLA", "C250"). מנקים ל-modelFamily ש-imagin מזהה.
+// מותגי יוקרה משתמשים בשם דגם+מנוע ("C250") בעוד imagin מצפה למשפחה ("c-class") —
+// לכן יש כללים פר-יצרן. לשאר היצרנים שומרים את השם כמו שהוא (COROLLA/SPORTAGE עובדים).
+function normalizeModel(model: string | null | undefined, makeSlug: string): string | undefined {
   if (!model) return undefined;
   const clean = model
     .trim()
     .toLowerCase()
-    .replace(/[^a-z0-9\s-]/g, "") // משאירים רק תווים שימושיים ל-imagin
+    .replace(/[^a-z0-9\s-]/g, "")
     .replace(/\s+/g, " ")
     .trim();
-  return clean || undefined;
+  if (!clean) return undefined;
+
+  const first = clean.split(" ")[0]; // הטוקן הראשון = משפחת הדגם (השאר = מנוע/גימור)
+
+  if (makeSlug === "mercedes-benz") {
+    // C250→c-class · E250→e-class · A180→a-class · GLC250→glc · CLA200→cla
+    const letters = first.match(/^([a-z]+)/)?.[1];
+    if (letters) return letters.length === 1 ? `${letters}-class` : letters;
+  }
+  if (makeSlug === "bmw") {
+    // 320i→3-series · 118d→1-series · X5→x5 · M3→m3 · i3→i3
+    const digit = first.match(/^(\d)/)?.[1];
+    return digit ? `${digit}-series` : first;
+  }
+  if (makeSlug === "lexus") {
+    // NX200T→nx · RX450H→rx · IS300→is · CT200H→ct
+    const letters = first.match(/^([a-z]{2})/)?.[1];
+    if (letters) return letters;
+  }
+
+  return clean;
 }
 
 export interface CarImageInput {
@@ -79,7 +101,7 @@ export function buildCarImageUrl({
     fileType: "webp",
   });
 
-  const family = normalizeModel(model);
+  const family = normalizeModel(model, make);
   if (family) params.set("modelFamily", family);
 
   if (year) params.set("modelYear", String(year));
