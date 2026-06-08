@@ -1,11 +1,9 @@
 import Link from "next/link";
-import { Clock } from "lucide-react";
+import { Clock, Car } from "lucide-react";
 import { SiteShell } from "@/components/layout/site-shell";
 import { Card } from "@/components/ui/card";
-import { RiskBadge } from "@/components/domain/risk-badge";
 import { GuestHistoryList } from "@/components/domain/guest-history-list";
 import { createClient } from "@/lib/supabase/server";
-import { toneFromScore } from "@/lib/risk";
 
 function formatRelative(iso: string): string {
   const d = new Date(iso);
@@ -41,13 +39,22 @@ export default async function HistoryPage() {
     );
   }
 
-  const { data: history } = await supabase
+  // פרמיום — היסטוריה ללא הגבלה; חינם — 20 אחרונים
+  const { data: profile } = await supabase
+    .from("profiles")
+    .select("plan")
+    .eq("id", user.id)
+    .single();
+  const isPremium = profile?.plan === "premium";
+
+  const historyQuery = supabase
     .from("search_history")
     .select("*")
     .eq("user_id", user.id)
-    .order("searched_at", { ascending: false })
-    .limit(20);
+    .order("searched_at", { ascending: false });
+  if (!isPremium) historyQuery.limit(20);
 
+  const { data: history } = await historyQuery;
   const items = history ?? [];
 
   return (
@@ -58,7 +65,7 @@ export default async function HistoryPage() {
             היסטוריית חיפושים
           </h1>
           <p className="text-sm text-[var(--color-text-subtle)] mt-1">
-            20 חיפושים אחרונים
+            {isPremium ? "כל החיפושים שלך" : "20 חיפושים אחרונים"}
           </p>
         </div>
 
@@ -74,12 +81,12 @@ export default async function HistoryPage() {
           <div className="space-y-2">
             {items.map((item) => {
               const summary = item.result_summary as Record<string, unknown> | null;
-              const riskScore = Number(summary?.riskScore ?? 0);
-              const tone = toneFromScore(riskScore);
               return (
                 <Link key={item.id} href={`/search/${item.license_plate}`}>
                   <Card className="p-4 flex items-center gap-4 hover:shadow-[var(--shadow-sm)] transition-shadow cursor-pointer">
-                    <RiskBadge score={riskScore} tone={tone} size="sm" showLabel={false} />
+                    <div className="w-10 h-10 shrink-0 rounded-lg bg-[var(--color-gray-100)] grid place-items-center text-[var(--color-gray-400)]">
+                      <Car size={20} />
+                    </div>
                     <div className="flex-1 min-w-0">
                       <p className="font-bold text-[var(--color-gray-900)] truncate">
                         {String(summary?.manufacturer ?? "")} {String(summary?.model ?? "")}

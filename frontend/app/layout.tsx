@@ -13,7 +13,7 @@ const heebo = Heebo({
 export const metadata: Metadata = {
   title: "MyCarPortal — בדוק כל רכב בישראל תוך שניות",
   description:
-    "פלטפורמה ישראלית לחיפוש ובדיקת רכבים פרטיים — דירוג סיכון, היסטוריית בעלויות, טסט, ריקולים וניהול הרכב האישי שלך.",
+    "פלטפורמה ישראלית לחיפוש ובדיקת רכבים פרטיים — היסטוריית בעלויות, טסט, ריקולים, הערכת שווי וניהול הרכב האישי שלך.",
   applicationName: "MyCarPortal",
   manifest: "/manifest.webmanifest",
   icons: {

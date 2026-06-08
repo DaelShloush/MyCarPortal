@@ -13,7 +13,7 @@ export default function AuthLayout({ children }: { children: React.ReactNode }) 
         </Link>
         {children}
         <p className="text-xs text-center text-[var(--color-text-subtle)] mt-6">
-          ⚠️ הציון מבוסס על נתונים ציבוריים בלבד ואינו מחליף בדיקה פיזית.
+          ⚠️ המידע מבוסס על נתונים ציבוריים בלבד ואינו מחליף בדיקה פיזית.
         </p>
       </div>
     </div>

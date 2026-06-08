@@ -1,19 +1,6 @@
 // MyCarPortal — Domain types (frontend dummy phase)
 // בשלב הבא (Module 7-8) הטיפוסים ייבנו על בסיס Supabase schema.
 
-export type RiskTone = "good" | "warn" | "high";
-
-export interface RiskBreakdown {
-  ownership: number;   // 0-20
-  frequency: number;   // 0-10
-  age: number;         // 0-15
-  test: number;        // 0-15
-  km: number;          // 0-15
-  structural: number;  // 0-10
-  recalls: number;     // 0-10
-  ownerType: number;   // 0-5
-}
-
 export interface Owner {
   date: string;          // "03/2019"
   type: "פרטי" | "החכר (ליסינג)" | "חברה" | "סוחר" | "השכרה";
@@ -117,11 +104,6 @@ export interface Vehicle {
   status?: "active" | "inactive" | "decommissioned";
   // image
   imageUrl?: string;
-  // risk
-  riskScore: number;
-  riskTone: RiskTone;
-  riskLabel: string;
-  riskBreakdown: RiskBreakdown;
 }
 
 // Vehicle — מצב ניהול עבור משתמש מחובר
@@ -138,8 +120,6 @@ export interface SearchHistoryItem {
   manufacturer: string;
   model: string;
   year: number;
-  riskScore: number;
-  riskTone: RiskTone;
   searchedAt: string;     // ISO
 }
 

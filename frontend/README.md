@@ -2,7 +2,7 @@
 
 > פרויקט גמר Full-Stack מונחה AI · מודול 6 (Frontend Development)
 
-אפליקציית ווב ישראלית (PWA) לחיפוש ובדיקת רכבים פרטיים ולניהול הרכב האישי. הפרויקט שולף נתונים ממאגרי data.gov.il (משרד התחבורה) ומחשב ציון סיכון משוקלל לכל רכב.
+אפליקציית ווב ישראלית (PWA) לחיפוש ובדיקת רכבים פרטיים ולניהול הרכב האישי. הפרויקט שולף נתונים ממאגרי data.gov.il (משרד התחבורה) ומציג מידע מקיף על כל רכב.
 
 ## סטאק
 
@@ -47,11 +47,10 @@ frontend/
 ├── components/
 │   ├── ui/                    # Primitives (Button, Card, Input, Badge, Progress, Section)
 │   ├── layout/                # Navbar, Footer, MobileBottomNav, SiteShell
-│   └── domain/                # רכיבי Domain (RiskBadge, VehicleCard, OwnershipTimeline, וכו')
+│   └── domain/                # רכיבי Domain (VehicleCard, OwnershipTimeline, וכו')
 └── lib/
     ├── types.ts               # TypeScript domain types
     ├── dummy-data.ts          # נתוני placeholder
-    ├── risk.ts                # ציון סיכון: tone/label/message
     └── utils.ts               # cn() — Tailwind class merger
 ```
 
@@ -60,7 +59,7 @@ frontend/
 | URL | רכיב | תיאור |
 |-----|------|--------|
 | `/` | LandingPage | עמוד נחיתה — Hero + חיפוש + Features + How it works |
-| `/search/[plate]` | SearchResultsPage | תוצאות חיפוש רכב לפי מספר רישוי — single page עם 10 סקשנים |
+| `/search/[plate]` | SearchResultsPage | תוצאות חיפוש רכב לפי מספר רישוי — single page עם 9 סקשנים |
 | `/dashboard` | DashboardPage | "הרכבים שלי" — VehicleCards + תזכורות פעילות |
 | `/vehicle/[id]` | VehicleDetailPage | פרטי רכב אישי + טיפולים + מסמכים + תזכורות |
 | `/favorites` | FavoritesPage | מועדפים + השוואה |
@@ -69,15 +68,13 @@ frontend/
 | `/login` | LoginPage | התחברות |
 | `/register` | RegisterPage | הרשמה |
 
-לחיפוש דוגמה: `/search/1234567` (good), `/search/8901234` (warn), `/search/5556677` (high).
+לחיפוש דוגמה: `/search/1234567`, `/search/8901234`, `/search/5556677`.
 
 ## רכיבים מרכזיים
 
 - **`SiteShell`** — Layout wrapper המכיל Navbar, Footer ו-MobileBottomNav. עוטף את כל העמודים.
-- **`RiskBadge`** — תג ציון סיכון בשלושה גדלים. יש בו 3 צבעים (good/warn/high) שמחושבים מ-`toneFromScore(score)`.
 - **`OwnershipTimeline`** — ציר זמן אנכי של היסטוריית בעלויות, עם הדגשה לסוחרים ולבעלים נוכחי.
 - **`SafetyGrid`** — רשת של מערכות בטיחות (ABS, ESP, ADAS) עם ✓/✗.
-- **`RiskBreakdown`** — פירוט ציון הסיכון ל-8 פרמטרים עם Progress bars.
 - **`VehicleCard`** — כרטיס רכב לדשבורד עם פרוגרס בר לטסט וביטוח.
 
 ## Design System
@@ -88,7 +85,7 @@ frontend/
 
 ## ⚠️ Disclaimer
 
-הציון מבוסס על נתונים ציבוריים בלבד ואינו מחליף בדיקה פיזית במכון מורשה.
+המידע מבוסס על נתונים ציבוריים בלבד ואינו מחליף בדיקה פיזית במכון מורשה.
 
 ---
 

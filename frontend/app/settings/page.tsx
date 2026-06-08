@@ -1,4 +1,4 @@
-import { Crown, Bell, Mail, Lock, LogOut, CreditCard, ChevronLeft, CheckCircle, AlertCircle } from "lucide-react";
+import { Crown, Mail, Lock, LogOut, CreditCard, ChevronLeft, CheckCircle, AlertCircle } from "lucide-react";
 import { AuthRequired } from "@/components/domain/auth-required";
 import { SiteShell } from "@/components/layout/site-shell";
 import { Card } from "@/components/ui/card";
@@ -6,11 +6,11 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
 import { createClient } from "@/lib/supabase/server";
-import { updateProfileAction } from "@/app/actions/profile";
+import { updateProfileAction, upgradeToPremiumAction } from "@/app/actions/profile";
 import { logoutAction } from "@/app/(auth)/actions";
 
 interface SettingsPageProps {
-  searchParams: Promise<{ success?: string; error?: string }>;
+  searchParams: Promise<{ success?: string; error?: string; upgraded?: string }>;
 }
 
 export default async function SettingsPage({ searchParams }: SettingsPageProps) {
@@ -26,6 +26,7 @@ export default async function SettingsPage({ searchParams }: SettingsPageProps) 
 
   const sp = await searchParams;
   const success = sp?.success === "1";
+  const upgraded = sp?.upgraded === "1";
   const errorMsg = sp?.error ?? null;
 
   const userName = profile?.name ?? user.user_metadata?.name ?? "";
@@ -44,6 +45,12 @@ export default async function SettingsPage({ searchParams }: SettingsPageProps) 
           <div className="flex items-center gap-3 p-4 rounded-xl bg-green-50 border border-green-200 text-green-800">
             <CheckCircle size={20} className="shrink-0" />
             <p className="text-sm font-medium">הפרטים עודכנו בהצלחה!</p>
+          </div>
+        )}
+        {upgraded && (
+          <div className="flex items-center gap-3 p-4 rounded-xl bg-amber-50 border border-amber-200 text-amber-800">
+            <Crown size={20} className="shrink-0" />
+            <p className="text-sm font-medium">ברוך הבא ל-Premium! 🎉 כל הפיצ׳רים נפתחו עבורך.</p>
           </div>
         )}
         {errorMsg && (
@@ -111,18 +118,37 @@ export default async function SettingsPage({ searchParams }: SettingsPageProps) 
                   </p>
                   <p className="text-xs text-[var(--color-text-subtle)]">
                     {isPremium
-                      ? "עד 3 רכבים · מסמכים ללא הגבלה · אימייל + Push"
-                      : "1 רכב · 5 מסמכים · אימייל בלבד"}
+                      ? "עד 3 רכבים · מסמכים והיסטוריה ללא הגבלה · השוואה עד 4 · PDF"
+                      : "1 רכב · 5 מסמכים · 20 חיפושים אחרונים · השוואה עד 2"}
                   </p>
                 </div>
               </div>
-              {!isPremium && (
-                <Button variant="primary" className="bg-amber-600 hover:bg-amber-700">
-                  <Crown size={16} />
-                  שדרג
-                </Button>
-              )}
             </div>
+
+            {/* שדרוג ל-Premium */}
+            {!isPremium && (
+              <div className="mt-4 rounded-xl border-2 border-amber-300 bg-gradient-to-br from-amber-50 to-white p-5">
+                <div className="flex items-baseline gap-1 mb-3">
+                  <span className="text-3xl font-black text-[var(--color-gray-900)]">₪9.90</span>
+                  <span className="text-sm text-[var(--color-text-subtle)]">/ חודש</span>
+                </div>
+                <ul className="text-sm text-[var(--color-gray-700)] space-y-1.5 mb-4">
+                  <li className="flex items-center gap-2"><CheckCircle size={15} className="text-amber-600 shrink-0" /> עד 3 רכבים בניהול</li>
+                  <li className="flex items-center gap-2"><CheckCircle size={15} className="text-amber-600 shrink-0" /> מסמכים והיסטוריית חיפושים ללא הגבלה</li>
+                  <li className="flex items-center gap-2"><CheckCircle size={15} className="text-amber-600 shrink-0" /> מועדפים ללא הגבלה · השוואת עד 4 רכבים</li>
+                  <li className="flex items-center gap-2"><CheckCircle size={15} className="text-amber-600 shrink-0" /> הפקת דוח PDF · ללא פרסומות</li>
+                </ul>
+                <form action={upgradeToPremiumAction}>
+                  <Button type="submit" variant="primary" className="w-full bg-amber-600 hover:bg-amber-700">
+                    <CreditCard size={16} />
+                    שדרג עכשיו ל-Premium
+                  </Button>
+                </form>
+                <p className="text-[11px] text-center text-[var(--color-text-subtle)] mt-2">
+                  ניתן לביטול בכל עת · החיוב מתבצע מדי חודש
+                </p>
+              </div>
+            )}
           </div>
         </Card>
 
@@ -142,13 +168,6 @@ export default async function SettingsPage({ searchParams }: SettingsPageProps) 
                 body: "תזכורות לטסט וביטוח",
                 on: true,
                 premium: false,
-              },
-              {
-                icon: Bell,
-                title: "התראות Push",
-                body: "דורש Premium ו-Add to Home Screen",
-                on: profile?.push_enabled ?? false,
-                premium: true,
               },
             ].map((item, i) => {
               const Icon = item.icon;

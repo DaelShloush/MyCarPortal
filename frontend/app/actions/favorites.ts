@@ -7,8 +7,6 @@ interface VehicleSummary {
   manufacturer: string;
   model: string;
   year: number;
-  riskScore: number;
-  riskTone: string;
 }
 
 export type ActionResult =

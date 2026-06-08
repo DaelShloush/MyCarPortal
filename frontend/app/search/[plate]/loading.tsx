@@ -31,13 +31,10 @@ export default function SearchLoading() {
         {/* תמונת רכב */}
         <SkeletonBox className="h-48 md:h-64 w-full" />
 
-        {/* כותרת + תג סיכון */}
-        <div className="flex items-start justify-between gap-3">
-          <div className="flex-1 space-y-2">
-            <SkeletonBox className="h-8 w-2/3" />
-            <SkeletonBox className="h-4 w-1/2" />
-          </div>
-          <SkeletonBox className="h-20 w-20 rounded-full" />
+        {/* כותרת */}
+        <div className="space-y-2">
+          <SkeletonBox className="h-8 w-2/3" />
+          <SkeletonBox className="h-4 w-1/2" />
         </div>
 
         {/* כפתורי פעולה */}

@@ -2,11 +2,9 @@
 
 import { useEffect, useState } from "react";
 import Link from "next/link";
-import { Clock, Trash2, Info } from "lucide-react";
+import { Clock, Trash2, Info, Car } from "lucide-react";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { RiskBadge } from "@/components/domain/risk-badge";
-import { toneFromScore } from "@/lib/risk";
 import {
   getGuestHistory,
   clearGuestHistory,
@@ -78,16 +76,12 @@ export function GuestHistoryList() {
           </div>
           <div className="space-y-2">
             {items.map((item) => {
-              const tone = toneFromScore(item.riskScore);
               return (
                 <Link key={item.plate} href={`/search/${item.plate}`}>
                   <Card className="p-4 flex items-center gap-4 hover:shadow-[var(--shadow-sm)] transition-shadow cursor-pointer">
-                    <RiskBadge
-                      score={item.riskScore}
-                      tone={tone}
-                      size="sm"
-                      showLabel={false}
-                    />
+                    <div className="w-10 h-10 shrink-0 rounded-lg bg-[var(--color-gray-100)] grid place-items-center text-[var(--color-gray-400)]">
+                      <Car size={20} />
+                    </div>
                     <div className="flex-1 min-w-0">
                       <p className="font-bold text-[var(--color-gray-900)] truncate">
                         {item.manufacturer} {item.model}

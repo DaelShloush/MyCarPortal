@@ -19,8 +19,6 @@ export function SearchHistoryTracker({ isLoggedIn, item }: Props) {
         manufacturer: item.manufacturer,
         model: item.model,
         year: item.year,
-        riskScore: item.riskScore,
-        riskTone: item.riskTone,
       });
     } else {
       addGuestHistory(item);

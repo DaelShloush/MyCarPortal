@@ -6,8 +6,6 @@ interface SearchSummary {
   manufacturer: string;
   model: string;
   year: number;
-  riskScore: number;
-  riskTone: string;
 }
 
 // שומר חיפוש בהיסטוריה של משתמש מחובר (אורחים נשמרים ב-localStorage).

@@ -5,7 +5,7 @@ export default function manifest(): MetadataRoute.Manifest {
     name: "MyCarPortal — בדיקת רכב בישראל",
     short_name: "MyCarPortal",
     description:
-      "בדיקת היסטוריית רכב, דירוג סיכון וניהול רכב אישי — מבוסס נתוני משרד התחבורה.",
+      "בדיקת היסטוריית רכב, הערכת שווי וניהול רכב אישי — מבוסס נתוני משרד התחבורה.",
     start_url: "/",
     display: "standalone",
     orientation: "portrait",

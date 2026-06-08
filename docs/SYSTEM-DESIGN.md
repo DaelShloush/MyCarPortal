@@ -7,7 +7,7 @@
 | רכיב | טכנולוגיה | תפקיד באפליקציה |
 |---|---|---|
 | **Client** | Next.js 15 (Browser / PWA) | מציג תוצאות חיפוש, דשבורד, טפסים. שולח בקשות לשרת. עובד אופליין עם Service Worker. |
-| **Server** | Next.js API Routes (Vercel) | Proxy לכל קריאות ה-API החיצוניות, חישוב ציון סיכון, לוגיקה עסקית, אימות בקשות. |
+| **Server** | Next.js API Routes (Vercel) | Proxy לכל קריאות ה-API החיצוניות, עיבוד ואיחוד נתוני הרכב, לוגיקה עסקית, אימות בקשות. |
 | **Database** | Supabase PostgreSQL + RLS | שמירת פרופילים, רכבים, תזכורות, מועדפים, היסטוריית טיפולים, מסמכים. RLS מגן שכל משתמש רואה רק את הנתונים שלו. |
 | **Authentication** | Supabase Auth | הרשמה/התחברות (email + Google). מנפיק JWT token שמצורף לכל בקשה. |
 | **File Storage** | Supabase Storage | אחסון מסמכי רכב (רישיון, ביטוח, קבלות). גישה מוגנת לפי user_id. |
@@ -16,7 +16,7 @@
 | **Third-Party: data.gov.il** | CKAN REST API | 6+1 קריאות מקבילות לכל חיפוש — פרטי רכב, היסטוריית בעלויות, ק"מ, ריקולים, תג נכה, מפרט דגם. |
 | **Third-Party: Claude Haiku** | Anthropic Vision API | OCR לזיהוי לוחית רישוי מצילום. |
 | **Third-Party: Stripe** | Payments API + Webhooks | עיבוד תשלומים לפרמיום. Webhook מודיע לשרת כשתשלום הצליח. |
-| **Notifications** | Resend (email) + web-push | Resend שולח מיילי תזכורת. web-push + VAPID שולח Push למשתמשי פרמיום. |
+| **Notifications** | Resend (email) | Resend שולח מיילי תזכורת לכל המשתמשים. |
 | **Scheduler** | Vercel Cron | מפעיל בדיקת תזכורות כל יום ב-08:00. |
 
 ---
@@ -36,7 +36,6 @@ graph TD
     ClaudeAPI["🤖 Claude Haiku<br/><i>Vision API<br/>OCR לוחית רישוי</i>"]
     Stripe["💳 Stripe<br/><i>תשלומי פרמיום</i>"]
     Resend["📧 Resend<br/><i>מיילי תזכורת</i>"]
-    WebPush["🔔 Web Push<br/><i>Push Notifications<br/>פרמיום בלבד</i>"]
     Cron["⏰ Vercel Cron<br/><i>08:00 כל יום</i>"]
 
     Client <-->|"HTTPS / API"| Server
@@ -53,9 +52,7 @@ graph TD
     Stripe -->|"Webhook: payment_succeeded"| Server
     Cron -->|"Trigger Daily"| Server
     Server -->|"Send Email"| Resend
-    Server -->|"Send Push"| WebPush
     Resend -->|"Email"| Client
-    WebPush -->|"Push Alert"| Client
 
     style Client fill:#dbeafe,stroke:#2563eb,stroke-width:2px,color:#1e3a5f
     style SW fill:#e0f2fe,stroke:#0284c7,stroke-width:2px,color:#0c4a6e
@@ -68,7 +65,6 @@ graph TD
     style ClaudeAPI fill:#f3e8ff,stroke:#9333ea,stroke-width:2px,color:#581c87
     style Stripe fill:#e9d5ff,stroke:#7c3aed,stroke-width:2px,color:#4c1d95
     style Resend fill:#fed7aa,stroke:#ea580c,stroke-width:2px,color:#7c2d12
-    style WebPush fill:#fee2e2,stroke:#dc2626,stroke-width:2px,color:#7f1d1d
     style Cron fill:#f0fdf4,stroke:#15803d,stroke-width:2px,color:#14532d
 ```
 
@@ -82,7 +78,7 @@ graph TD
 2. **בקשה לשרת** — Client שולח `GET /api/vehicle/[plate]`. השרת הוא Proxy — ה-Client לא מדבר ישירות עם data.gov.il.
 3. **6 קריאות מקבילות** — השרת שולח `Promise.all` עם 6 בקשות בו-זמנית ל-data.gov.il: פרטי רכב ראשי, Extended (מרכב/צמיגים), היסטורית בעלויות, היסטוריה טכנית (ק"מ/שינויים), ריקולים פתוחים, תג נכה.
 4. **קריאה 7 תלויה** — לאחר תוצאה מקריאה 1, השרת שולח קריאה נוספת למפרט הדגם (לפי `tozeret_cd` + `degem_cd`).
-5. **עיבוד ב-Server** — חישוב ציון סיכון (8 פרמטרים), חישוב "יד", בניית URL לתמונה (imagin.studio) ולוגו (avto-dev).
+5. **עיבוד ב-Server** — חישוב "יד", בניית URL לתמונה (imagin.studio) ולוגו (avto-dev).
 6. **תגובה ל-Client** — השרת מחזיר JSON מאוחד. Client מרנדר עמוד אחד עם כל הסקשנים.
 
 ### Sequence Diagram
@@ -113,11 +109,10 @@ sequenceDiagram
     Server->>DataGov: מפרט דגם (142afde2) — לפי tozeret_cd + degem_cd
     DataGov-->>Server: מפרט מלא (90 שדות)
 
-    Server->>Server: חישוב ציון סיכון (8 פרמטרים)
     Server->>Server: חישוב "יד" מהיסטוריית בעלויות
     Server->>Server: בניית URL לתמונה + לוגו
 
-    Server-->>Client: JSON מאוחד — כל הנתונים + ציון סיכון
+    Server-->>Client: JSON מאוחד — כל נתוני הרכב
 
     Client->>CDN: טעינת תמונת CGI (imagin.studio)
     Client->>CDN: טעינת לוגו יצרן (avto-dev)
@@ -134,10 +129,9 @@ sequenceDiagram
 
 1. **Cron מופעל** — Vercel Cron מפעיל בכל יום ב-08:00 בקשה ל-`/api/reminders/check`.
 2. **שליפת תזכורות** — השרת שואל את Supabase DB: "אילו תזכורות לא נשלחו עדיין, ו-`due_date` שלהן הוא בין היום ל-30 יום מעכשיו?"
-3. **לכל תזכורת — שליחת אימייל** — השרת קורא ל-Resend API עם פרטי התזכורת. זמין לכל המשתמשים (חינם + פרמיום).
-4. **לפרמיום — שליחת Push** — השרת בודק אם למשתמש יש `push_subscription` ב-DB. אם כן — שולח Push Notification דרך web-push + VAPID.
-5. **עדכון DB** — השרת מסמן את התזכורת כ-`notified_email = true` / `notified_push = true` כדי לא לשלוח שוב.
-6. **הודעה מגיעה** — המשתמש מקבל מייל / Push עם "הטסט של הרכב שלך פג בעוד 30 יום".
+3. **לכל תזכורת — שליחת אימייל** — השרת קורא ל-Resend API עם פרטי התזכורת. זמין לכל המשתמשים.
+4. **עדכון DB** — השרת מסמן את התזכורת כ-`notified_email = true` כדי לא לשלוח שוב.
+5. **הודעה מגיעה** — המשתמש מקבל מייל עם "הטסט של הרכב שלך פג בעוד 30 יום".
 
 ### Sequence Diagram
 
@@ -147,7 +141,6 @@ sequenceDiagram
     participant Server as ⚙️ Server
     participant DB as 🗄️ Supabase DB
     participant Resend as 📧 Resend
-    participant Push as 🔔 Web Push
     actor User as 👤 משתמש
 
     Cron->>Server: POST /api/reminders/check (08:00 בוקר)
@@ -159,14 +152,7 @@ sequenceDiagram
         Server->>Resend: שלח מייל — "הטסט פג בעוד X ימים"
         Resend-->>User: 📧 מייל תזכורת
 
-        alt משתמש פרמיום + push_subscription קיים
-            Server->>DB: שלוף push_subscription endpoint + keys
-            DB-->>Server: { endpoint, p256dh, auth }
-            Server->>Push: שלח Web Push Notification
-            Push-->>User: 🔔 התראה על המסך
-        end
-
-        Server->>DB: עדכן notified_email=true / notified_push=true
+        Server->>DB: עדכן notified_email=true
     end
 
     Server-->>Cron: 200 OK — X תזכורות נשלחו

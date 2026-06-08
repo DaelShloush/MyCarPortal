@@ -11,8 +11,6 @@ import type {
   PersonalImportRecord,
 } from "./data-gov";
 import type { Vehicle, Owner, Recall, SafetyFeatures } from "../types";
-import { calculateRisk } from "../risk-calculator";
-import { toneFromScore, labelFromTone } from "../risk";
 import { getManufacturerSlug } from "../manufacturer-logos";
 
 export interface VehicleApiResult {
@@ -142,19 +140,6 @@ function buildVehicle(params: {
     return s;
   };
 
-  const riskBreakdown = calculateRisk({
-    owners,
-    year,
-    testExpiryDate,
-    kmAtLastTest,
-    structuralChange,
-    openRecallCount: recalls.filter((r) => r.open).length,
-    firstOwnerType: owners[0]?.type,
-  });
-
-  const riskScore = Object.values(riskBreakdown).reduce((a, b) => a + b, 0);
-  const riskTone = toneFromScore(riskScore);
-
   // yad = number of private owners (not dealer/leasing)
   const yad = owners.filter((o) => o.type === "פרטי").length;
 
@@ -211,10 +196,6 @@ function buildVehicle(params: {
     chassis: clean(main.misgeret),
     isPersonalImport: !!importRec,
     importType: clean(importRec?.sug_yevu),
-    riskScore,
-    riskTone,
-    riskLabel: labelFromTone(riskTone),
-    riskBreakdown,
   };
 }
 

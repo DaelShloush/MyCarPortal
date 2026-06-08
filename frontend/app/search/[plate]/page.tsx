@@ -9,7 +9,6 @@ import {
   ShieldCheck,
   Leaf,
   Disc3,
-  BarChart3,
   ExternalLink,
   Tag,
   Wallet,
@@ -17,13 +16,11 @@ import {
 import { SiteShell } from "@/components/layout/site-shell";
 import { Section, InfoRow } from "@/components/ui/section";
 import { Badge } from "@/components/ui/badge";
-import { RiskBadge } from "@/components/domain/risk-badge";
 import { VehicleImage } from "@/components/domain/vehicle-image";
 import { ManufacturerLogo } from "@/components/domain/manufacturer-logo";
 import { OwnershipTimeline } from "@/components/domain/ownership-timeline";
 import { RecallsList } from "@/components/domain/recalls-list";
 import { SafetyGrid } from "@/components/domain/safety-grid";
-import { RiskBreakdown } from "@/components/domain/risk-breakdown";
 import { SearchActions } from "@/components/domain/search-actions";
 import { SearchHistoryTracker } from "@/components/domain/search-history-tracker";
 import { CompareInput } from "@/components/domain/compare-input";
@@ -84,8 +81,6 @@ export default async function SearchPage({ params }: SearchPageProps) {
     manufacturer: vehicle.manufacturer,
     model: vehicle.model,
     year: vehicle.year,
-    riskScore: vehicle.riskScore,
-    riskTone: vehicle.riskTone,
   };
 
   const currentYear = new Date().getFullYear();
@@ -123,8 +118,6 @@ export default async function SearchPage({ params }: SearchPageProps) {
           manufacturer: summary.manufacturer,
           model: summary.model,
           year: summary.year,
-          riskScore: summary.riskScore,
-          riskTone: summary.riskTone,
           searchedAt: new Date().toISOString(),
         }}
       />
@@ -221,11 +214,6 @@ export default async function SearchPage({ params }: SearchPageProps) {
                 )}
               </p>
             </div>
-            <RiskBadge
-              score={vehicle.riskScore}
-              tone={vehicle.riskTone}
-              showMessage
-            />
           </div>
 
           {/* Action buttons */}
@@ -580,16 +568,7 @@ export default async function SearchPage({ params }: SearchPageProps) {
           </div>
         </Section>
 
-        {/* ===== 9. דירוג סיכון — פירוט ===== */}
-        <Section title="דירוג סיכון — פירוט" icon={<BarChart3 size={16} />}>
-          <RiskBreakdown
-            breakdown={vehicle.riskBreakdown}
-            total={vehicle.riskScore}
-            tone={vehicle.riskTone}
-          />
-        </Section>
-
-        {/* ===== 10. קישורים שימושיים ===== */}
+        {/* ===== 9. קישורים שימושיים ===== */}
         <Section title="קישורים שימושיים" icon={<ExternalLink size={16} />}>
           <ul className="space-y-2">
             {[
@@ -657,7 +636,7 @@ export default async function SearchPage({ params }: SearchPageProps) {
             <div>
               <p className="font-bold mb-1">מידע שלא זמין במאגרים הציבוריים</p>
               <p className="text-xs">
-                היסטוריית תאונות, פירוט מבחני טסט קודמים, פרטי בעלים. הציון מבוסס על נתונים ציבוריים בלבד —
+                היסטוריית תאונות, פירוט מבחני טסט קודמים, פרטי בעלים. המידע מבוסס על נתונים ציבוריים בלבד —
                 <strong> לפני רכישה, מומלץ בחום לבצע בדיקה פיזית במכון מורשה.</strong>
               </p>
             </div>

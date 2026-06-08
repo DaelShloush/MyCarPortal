@@ -13,7 +13,7 @@ export function Footer() {
             <span className="text-lg font-black text-white">MyCarPortal</span>
           </div>
           <p className="text-sm text-[var(--color-gray-400)] leading-relaxed">
-            בדוק כל רכב בישראל תוך שניות. מידע רשמי ממשרד התחבורה, דירוג סיכון, וניהול הרכב האישי שלך — במקום אחד.
+            בדוק כל רכב בישראל תוך שניות. מידע רשמי ממשרד התחבורה, הערכת שווי וניהול הרכב האישי שלך — במקום אחד.
           </p>
         </div>
 
@@ -42,7 +42,7 @@ export function Footer() {
             כל המידע נשלף ממאגרי data.gov.il של ממשלת ישראל. הנתונים מתעדכנים מדי יום.
           </p>
           <p className="text-xs text-[var(--color-gray-500)] mt-3">
-            ⚠️ הציון הוא הערכה ואינו מחליף בדיקה פיזית במכון מורשה.
+            ⚠️ המידע אינו מחליף בדיקה פיזית במכון מורשה.
           </p>
         </div>
       </div>

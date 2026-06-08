@@ -1,6 +1,6 @@
 import Link from "next/link";
 import {
-  ShieldCheck,
+  Wallet,
   Search as SearchIcon,
   Bell,
   FileText,
@@ -11,15 +11,14 @@ import {
 } from "lucide-react";
 import { SiteShell } from "@/components/layout/site-shell";
 import { SearchInput } from "@/components/domain/search-input";
-import { RiskBadge } from "@/components/domain/risk-badge";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 
 const FEATURES = [
   {
-    icon: ShieldCheck,
-    title: "דירוג סיכון משוקלל",
-    body: "ציון 0–100 שמשקלל בעלויות, טסט, ק״מ, ריקולים ושינויי מבנה — ב-3 שניות.",
+    icon: Wallet,
+    title: "הערכת שווי ועלויות",
+    body: "שווי מוערך לפי שנה וקילומטראז׳, ועלות אחזקה שנתית — אגרה, דלק וטיפולים.",
   },
   {
     icon: SearchIcon,
@@ -29,7 +28,7 @@ const FEATURES = [
   {
     icon: Bell,
     title: "תזכורות חכמות",
-    body: "טסט וביטוח מתקרבים? תקבל התראת אימייל ו-Push לפני שתהיה במינוס.",
+    body: "טסט וביטוח מתקרבים? תקבל התראת אימייל לפני שתהיה במינוס.",
   },
   {
     icon: FileText,
@@ -51,13 +50,13 @@ const FEATURES = [
 const STEPS = [
   { num: "01", title: "הזן מספר רישוי", body: "5–8 ספרות — בלי הרשמה ובלי תשלום." },
   { num: "02", title: "אנחנו שולפים את הנתונים", body: "6 קריאות מקבילות ל-data.gov.il — תוך שניות." },
-  { num: "03", title: "מקבל ציון סיכון + פירוט", body: "כל המידע על עמוד אחד — בעלויות, טסט, ריקולים, בטיחות." },
+  { num: "03", title: "מקבל את כל המידע", body: "הכל על עמוד אחד — בעלויות, טסט, ריקולים, בטיחות ושווי." },
 ];
 
-const SAMPLE_RISK_PREVIEWS = [
-  { score: 22, plate: "2233445", make: "קיה", model: "SPORTAGE", year: 2020 },
-  { score: 41, plate: "7788990", make: "סקודה", model: "OCTAVIA", year: 2018 },
-  { score: 78, plate: "5556677", make: "מזדה", model: "3", year: 2012 },
+const SAMPLE_PREVIEWS = [
+  { plate: "2233445", make: "קיה", model: "SPORTAGE", year: 2020 },
+  { plate: "7788990", make: "סקודה", model: "OCTAVIA", year: 2018 },
+  { plate: "5556677", make: "מזדה", model: "3", year: 2012 },
 ];
 
 export default function LandingPage() {
@@ -85,7 +84,7 @@ export default function LandingPage() {
               <span className="text-[var(--color-primary-300)]">תוך שניות</span>
             </h1>
             <p className="text-base md:text-lg text-white/80 leading-relaxed mb-8 max-w-xl">
-              היסטוריית בעלויות, טסט, ריקולים, בטיחות ודירוג סיכון — מאוחדים מכל המקורות הרשמיים, מוצגים בפשטות.
+              היסטוריית בעלויות, טסט, ריקולים, בטיחות והערכת שווי — מאוחדים מכל המקורות הרשמיים, מוצגים בפשטות.
             </p>
 
             <SearchInput className="bg-white" />
@@ -97,21 +96,22 @@ export default function LandingPage() {
 
           {/* תצוגה מקדימה צפה בצד */}
           <div className="hidden lg:flex absolute end-6 top-1/2 -translate-y-1/2 flex-col gap-3 max-w-xs">
-            {SAMPLE_RISK_PREVIEWS.map((p) => (
-              <Card
-                key={p.plate}
-                className="bg-white/95 backdrop-blur p-3 flex items-center gap-3 shadow-[var(--shadow-lg)]"
-              >
-                <RiskBadge score={p.score} size="sm" showLabel={false} />
-                <div className="text-sm">
-                  <div className="font-bold text-[var(--color-text)]">
-                    {p.make} {p.model}
+            {SAMPLE_PREVIEWS.map((p) => (
+              <Link key={p.plate} href={`/search/${p.plate}`}>
+                <Card className="bg-white/95 backdrop-blur p-3 flex items-center gap-3 shadow-[var(--shadow-lg)] hover:bg-white transition-colors">
+                  <div className="w-10 h-10 shrink-0 rounded-lg bg-[var(--color-primary-50)] grid place-items-center text-[var(--color-primary-600)]">
+                    <SearchIcon size={18} />
                   </div>
-                  <div className="text-xs text-[var(--color-text-subtle)] plate-text">
-                    {p.plate} · {p.year}
+                  <div className="text-sm">
+                    <div className="font-bold text-[var(--color-text)]">
+                      {p.make} {p.model}
+                    </div>
+                    <div className="text-xs text-[var(--color-text-subtle)] plate-text">
+                      {p.plate} · {p.year}
+                    </div>
                   </div>
-                </div>
-              </Card>
+                </Card>
+              </Link>
             ))}
           </div>
         </div>
@@ -210,7 +210,7 @@ export default function LandingPage() {
       {/* ===== DISCLAIMER ===== */}
       <section className="mx-auto max-w-[1200px] px-4 md:px-6 pb-12">
         <p className="text-xs text-center text-[var(--color-text-subtle)] leading-relaxed">
-          ⚠️ הציון מבוסס על נתונים ציבוריים בלבד ואינו מחליף בדיקה פיזית במכון מורשה.
+          ⚠️ המידע מבוסס על נתונים ציבוריים בלבד ואינו מחליף בדיקה פיזית במכון מורשה.
           אין לנו גישה להיסטוריית תאונות, ולא לפרטי בעלים (חוק פרטיות).
         </p>
       </section>

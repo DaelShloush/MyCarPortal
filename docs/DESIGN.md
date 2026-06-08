@@ -47,22 +47,24 @@
 --color-gray-50:  #f9fafb;   /* רקע דף */
 ```
 
-### 2.2 ציון סיכון — Risk Score Colors
+### 2.2 צבעי סטטוס — Status Colors
+
+צבעים סמנטיים לסטטוסים והתראות (תקין / לתשומת לב / בעייתי) — לדוגמה סטטוס טסט, דגלים בהיסטוריית בעלויות וכו'.
 
 ```css
-/* 🟢 נראה טוב — ציון 0-33 */
+/* 🟢 תקין */
 --color-risk-good-bg:     #dcfce7;
 --color-risk-good-border: #22c55e;
 --color-risk-good-text:   #15803d;
 --color-risk-good-hex:    #22c55e;
 
-/* 🟡 יש מה לבדוק — ציון 34-66 */
+/* 🟡 לתשומת לב */
 --color-risk-warn-bg:     #fef9c3;
 --color-risk-warn-border: #eab308;
 --color-risk-warn-text:   #854d0e;
 --color-risk-warn-hex:    #eab308;
 
-/* 🔴 סיכון גבוה — ציון 67-100 */
+/* 🔴 בעייתי / אזהרה */
 --color-risk-high-bg:     #fee2e2;
 --color-risk-high-border: #ef4444;
 --color-risk-high-text:   #b91c1c;
@@ -264,39 +266,7 @@ gap-12  → 48px   /* Hero sections */
 
 ## 7. קומפוננטים — עיצוב ספציפי
 
-### 7.1 Risk Badge
-
-הרכיב המרכזי באפליקציה — מופיע בראש עמוד תוצאות ובכרטיסי מועדפים.
-
-```tsx
-// variants: "good" | "warn" | "high"
-
-// גודל גדול — עמוד תוצאות
-<div className="flex items-center gap-2 px-4 py-2 rounded-full border-2"
-     style={{ background: riskBg, borderColor: riskBorder }}>
-  <span className="text-2xl font-black">{score}</span>
-  <div>
-    <div className="text-sm font-bold">{label}</div>       {/* נראה טוב */}
-    <div className="text-xs opacity-75">{score}/100</div>
-  </div>
-</div>
-
-// גודל קטן — כרטיסי מועדפים
-<span className="px-2 py-1 rounded-full text-xs font-bold"
-      style={{ background: riskBg, color: riskText }}>
-  {score}/100
-</span>
-```
-
-| ציון | צבע רקע | גבול | טקסט | מסר |
-|---|---|---|---|---|
-| 0–33 | `#dcfce7` | `#22c55e` | `#15803d` | "נראה טוב" |
-| 34–66 | `#fef9c3` | `#eab308` | `#854d0e` | "יש מה לבדוק" |
-| 67–100 | `#fee2e2` | `#ef4444` | `#b91c1c` | "סיכון גבוה" |
-
----
-
-### 7.2 Vehicle Card (Dashboard)
+### 7.1 Vehicle Card (Dashboard)
 
 ```
 ┌─────────────────────────────────────┐
@@ -318,7 +288,7 @@ gap-12  → 48px   /* Hero sections */
 
 ---
 
-### 7.3 Search Input
+### 7.2 Search Input
 
 ```
 ┌──────────────────────────────────────┐
@@ -334,7 +304,7 @@ gap-12  → 48px   /* Hero sections */
 
 ---
 
-### 7.4 Section Headers (עמוד תוצאות)
+### 7.3 Section Headers (עמוד תוצאות)
 
 ```tsx
 // כל סקשן: רקע כהה + כותרת לבנה
@@ -348,7 +318,7 @@ gap-12  → 48px   /* Hero sections */
 
 ---
 
-### 7.5 Ownership Timeline
+### 7.4 Ownership Timeline
 
 ```tsx
 // ציר זמן אנכי של בעלויות
@@ -374,7 +344,7 @@ gap-12  → 48px   /* Hero sections */
 
 ---
 
-### 7.6 Navbar
+### 7.5 Navbar
 
 **מובייל:**
 ```
@@ -397,7 +367,7 @@ gap-12  → 48px   /* Hero sections */
 
 ---
 
-### 7.7 Bottom Navigation (מובייל בלבד)
+### 7.6 Bottom Navigation (מובייל בלבד)
 
 ```
 ┌──────────────────────────────────────┐
@@ -414,7 +384,7 @@ gap-12  → 48px   /* Hero sections */
 
 ---
 
-### 7.8 Alert Banner (Dashboard)
+### 7.7 Alert Banner (Dashboard)
 
 ```tsx
 // סוגים: warning / danger / info
@@ -431,7 +401,7 @@ gap-12  → 48px   /* Hero sections */
 
 ---
 
-### 7.9 Loading Skeleton
+### 7.8 Loading Skeleton
 
 ```tsx
 // כל skeleton: אנימציית pulse
@@ -448,7 +418,7 @@ gap-12  → 48px   /* Hero sections */
 
 ---
 
-### 7.10 Empty State
+### 7.9 Empty State
 
 ```tsx
 <div className="flex flex-col items-center justify-center py-16 text-center">
@@ -461,7 +431,7 @@ gap-12  → 48px   /* Hero sections */
 
 ---
 
-### 7.11 Error State
+### 7.10 Error State
 
 ```tsx
 <div className="flex flex-col items-center justify-center py-16 text-center">
@@ -503,7 +473,7 @@ npm install lucide-react
 | אישור | `CheckCircle2` |
 | שגיאה | `XCircle` |
 | פרמיום | `Crown` |
-| Push | `Bell` |
+| תזכורת / התראה | `Bell` |
 | שתף | `Share2` |
 | PDF | `FileDown` |
 
@@ -556,7 +526,6 @@ hover:border-primary-300 hover:shadow-sm
 ├─────────────────────────────────┤
 │ טויוטה COROLLA 2019             │  ← text-2xl font-black
 │ יד 3 | לבן שנהב | בנזין         │  ← text-sm text-gray-500
-│              [🟢 28/100 נראה טוב]│  ← Risk Badge
 ├─────────────────────────────────┤
 │ [⭐ מועדפים] [📤 שתף] [📄 PDF] [🚗]│  ← 4 כפתורי פעולה
 ├─────────────────────────────────┤
@@ -580,9 +549,6 @@ hover:border-primary-300 hover:shadow-sm
 │ ═══ סביבה ופליטות ═══           │
 ├─────────────────────────────────┤
 │ ═══ צמיגים ═══                  │
-├─────────────────────────────────┤
-│ ═══ ציון סיכון — פירוט ═══      │
-│ [Progress bars לכל פרמטר]       │
 ├─────────────────────────────────┤
 │ ═══ קישורים שימושיים ═══        │
 │ 🔗 בדיקת רכב גנוב               │
@@ -774,7 +740,7 @@ app/
 - [ ] Heebo נטען עם `next/font/google`
 - [ ] shadcn/ui מותקן עם `--rtl`
 - [ ] Tailwind logical properties בלבד (אין `ml-`/`mr-`)
-- [ ] Risk Badge נבדק בשלושת הצבעים
+- [ ] צבעי סטטוס (status colors) נבדקו בשלושת הגוונים
 - [ ] Skeleton loading לכל עמוד שמשיג API
 - [ ] Touch targets ≥ 44px
 - [ ] Font-size גוף ≥ 16px

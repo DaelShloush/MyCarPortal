@@ -6,9 +6,7 @@ import { useRouter } from "next/navigation";
 import { Scale, Check, X } from "lucide-react";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { RiskBadge } from "@/components/domain/risk-badge";
 import { VehicleImage } from "@/components/domain/vehicle-image";
-import { toneFromScore } from "@/lib/risk";
 import { cn } from "@/lib/utils";
 
 interface FavoriteItem {
@@ -19,7 +17,6 @@ interface FavoriteItem {
   manufacturer: string;
   model: string;
   year: number | null;
-  riskScore: number;
 }
 
 interface Props {
@@ -50,7 +47,6 @@ export function FavoritesGrid({ items, maxCompare }: Props) {
     <>
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
         {items.map((fav) => {
-          const tone = toneFromScore(fav.riskScore);
           const isSelected = selected.includes(fav.license_plate);
           const disabled = atLimit && !isSelected;
           return (
@@ -89,17 +85,14 @@ export function FavoritesGrid({ items, maxCompare }: Props) {
                   variant="card"
                   className="mb-3"
                 />
-                <div className="flex items-start justify-between gap-2 mb-3 ps-8">
-                  <div>
-                    <p className="font-bold text-[var(--color-gray-900)]">
-                      {fav.manufacturer} {fav.model}
-                    </p>
-                    <p className="text-xs text-[var(--color-text-subtle)] plate-text mt-0.5">
-                      {fav.license_plate}
-                      {fav.year ? ` · ${fav.year}` : ""}
-                    </p>
-                  </div>
-                  <RiskBadge score={fav.riskScore} tone={tone} size="sm" showLabel={false} />
+                <div className="mb-3 ps-8">
+                  <p className="font-bold text-[var(--color-gray-900)]">
+                    {fav.manufacturer} {fav.model}
+                  </p>
+                  <p className="text-xs text-[var(--color-text-subtle)] plate-text mt-0.5">
+                    {fav.license_plate}
+                    {fav.year ? ` · ${fav.year}` : ""}
+                  </p>
                 </div>
                 {fav.notes && (
                   <p className="text-xs text-[var(--color-text-muted)] bg-[var(--color-bg-subtle)] rounded-lg px-3 py-2">

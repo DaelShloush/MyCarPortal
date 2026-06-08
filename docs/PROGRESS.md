@@ -17,18 +17,18 @@
 
 ## שלב 4: Wireframe ✅
 - עמוד נחיתה + חיפוש
-- עמוד תוצאות — single page עם 10 סקשנים
+- עמוד תוצאות — single page עם 9 סקשנים
 - דשבורד, מועדפים, היסטוריה, Auth
 
 ## שלב 5: Design ✅
 - עיצוב RTL עם Tailwind logical properties
-- Risk Badge + color system (ירוק/צהוב/אדום)
+- מערכת צבעים סמנטית (ירוק/צהוב/אדום) לסטטוסים והתראות
 - Mobile-first responsive
 
 ## שלב 6: Frontend Development ✅
 - Next.js 16.2.4 + TypeScript + Tailwind v4 + shadcn/ui RTL
-- עמוד תוצאות מלא (10 סקשנים): פרטים כלליים, מנוע, בעלויות, טסט, ריקולים, בטיחות, סביבה, צמיגים, דירוג סיכון, קישורים
-- Risk Badge + Risk Breakdown + Ownership Timeline + Safety Grid
+- עמוד תוצאות מלא (9 סקשנים): פרטים כלליים, מנוע, בעלויות, טסט, ריקולים, בטיחות, סביבה, צמיגים, קישורים
+- Ownership Timeline + Safety Grid
 - Dashboard, Favorites, History, Login, Register pages
 
 ## שלב 7: Data Design ✅
@@ -38,7 +38,6 @@
 
 ## שלב 8: Backend Development ✅
 - API Route: `/api/vehicle/[plate]` — proxy ל-data.gov.il (7 קריאות מקבילות + 2 תלויות)
-- אלגוריתם דירוג סיכון (8 פרמטרים, 0–100)
 - Auth מלא: email/password + Google OAuth + איפוס סיסמה
 - CRUD: favorites, search_history, vehicles, service_records, reminders, documents
 - Storage: bucket `documents` פרטי + RLS; העלאה/צפייה/מחיקה

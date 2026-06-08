@@ -76,7 +76,7 @@ export function generateSaleAd(input: AdInput): string {
   // סיום
   lines.push("");
   lines.push("📞 לפרטים ותיאום בדיקה — צרו קשר.");
-  lines.push("✅ נתוני הרכב נבדקו ב-MyCarPortal (היסטוריית בעלויות, טסט, ריקולים ודירוג סיכון).");
+  lines.push("✅ נתוני הרכב נבדקו ב-MyCarPortal (היסטוריית בעלויות, טסט וריקולים).");
 
   return lines.join("\n");
 }

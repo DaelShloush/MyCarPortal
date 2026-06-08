@@ -35,7 +35,6 @@ export default async function FavoritesPage() {
       manufacturer: String(summary.manufacturer ?? ""),
       model: String(summary.model ?? ""),
       year: summary.year ? Number(summary.year) : null,
-      riskScore: Number(summary.riskScore ?? 0),
     };
   });
 

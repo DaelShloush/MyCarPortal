@@ -7,6 +7,7 @@ import { VehicleCard } from "@/components/domain/vehicle-card";
 import { AlertBanner } from "@/components/domain/alert-banner";
 import { createClient } from "@/lib/supabase/server";
 import { getManufacturerSlug } from "@/lib/manufacturer-logos";
+import { upgradeToPremiumAction } from "@/app/actions/profile";
 
 export default async function DashboardPage() {
   const supabase = await createClient();
@@ -132,9 +133,6 @@ export default async function DashboardPage() {
                       ? daysLeft(v.insurance_expiry_date)
                       : 0,
                     nickname: v.nickname ?? undefined,
-                    riskScore: 0,
-                    riskTone: "good",
-                    riskLabel: "",
                     // required Vehicle fields (minimal)
                     engineCC: 0, horsepower: 0, drivetrain: "", gearbox: "",
                     bodyType: "", doors: 0, seats: 0, weightKg: 0, towingKg: 0,
@@ -150,8 +148,6 @@ export default async function DashboardPage() {
                     greenScore: 0, pollutionGroup: 0, co2: 0, nox: 0,
                     tireFront: "", tireRear: "", loadFront: 0, speedRating: "",
                     hasDisabilityTag: false,
-                    riskBreakdown: { ownership: 0, frequency: 0, age: 0, test: 0,
-                      km: 0, structural: 0, recalls: 0, ownerType: 0 },
                   } as Parameters<typeof VehicleCard>[0]["vehicle"]}
                 />
               ))}
@@ -181,12 +177,14 @@ export default async function DashboardPage() {
               <div className="flex-1 min-w-0">
                 <h3 className="font-bold text-amber-900">שדרג ל-Premium</h3>
                 <p className="text-sm text-amber-800">
-                  עד 3 רכבים, תזכורות Push, הפקת PDF, וללא פרסומות — ב-₪9.90 לחודש.
+                  עד 3 רכבים, מסמכים והיסטוריה ללא הגבלה, הפקת PDF, וללא פרסומות — ב-₪9.90 לחודש.
                 </p>
               </div>
-              <Button variant="primary" className="bg-amber-600 hover:bg-amber-700">
-                שדרוג ב-₪9.90
-              </Button>
+              <form action={upgradeToPremiumAction}>
+                <Button type="submit" variant="primary" className="bg-amber-600 hover:bg-amber-700">
+                  שדרוג ב-₪9.90
+                </Button>
+              </form>
             </div>
           </section>
         )}

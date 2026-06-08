@@ -177,7 +177,7 @@ export function RemindersManager({
 
       {initialReminders.length === 0 && !showCustom && (
         <p className="text-xs text-[var(--color-text-subtle)]">
-          צור תזכורת ותקבל התראת אימייל לפני המועד. (התראות Push — ב-Premium)
+          צור תזכורת ותקבל התראת אימייל לפני המועד.
         </p>
       )}
 

@@ -6,8 +6,6 @@ export interface GuestHistoryItem {
   manufacturer: string;
   model: string;
   year: number;
-  riskScore: number;
-  riskTone: string;
   searchedAt: string; // ISO
 }
 

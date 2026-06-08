@@ -2,21 +2,33 @@ import Link from "next/link";
 import { Scale, ChevronLeft } from "lucide-react";
 import { SiteShell } from "@/components/layout/site-shell";
 import { Button } from "@/components/ui/button";
-import { RiskBadge } from "@/components/domain/risk-badge";
 import { ManufacturerLogo } from "@/components/domain/manufacturer-logo";
 import { fetchVehicleByPlate } from "@/lib/api/vehicle-aggregator";
 import { estimateCurrentValue } from "@/lib/value-estimator";
 import { estimateCosts } from "@/lib/cost-estimator";
+import { createClient } from "@/lib/supabase/server";
 import type { Vehicle } from "@/lib/types";
 
 interface ComparePageProps {
   searchParams: Promise<{ plates?: string }>;
 }
 
-const MAX = 4;
-
 export default async function ComparePage({ searchParams }: ComparePageProps) {
   const { plates: platesParam } = await searchParams;
+
+  // מגבלת השוואה — חינם עד 2, פרמיום עד 4
+  const supabase = await createClient();
+  const { data: { user } } = await supabase.auth.getUser();
+  let isPremium = false;
+  if (user) {
+    const { data: profile } = await supabase
+      .from("profiles")
+      .select("plan")
+      .eq("id", user.id)
+      .single();
+    isPremium = profile?.plan === "premium";
+  }
+  const MAX = isPremium ? 4 : 2;
 
   const plates = (platesParam ?? "")
     .split(",")
@@ -70,9 +82,6 @@ export default async function ComparePage({ searchParams }: ComparePageProps) {
       </SiteShell>
     );
   }
-
-  // הרכב עם ציון הסיכון הנמוך ביותר (הטוב ביותר)
-  const minRisk = Math.min(...found.map((f) => f.vehicle.riskScore));
 
   const fmt = (n: number | undefined, suffix = "") =>
     n && n > 0 ? `${n.toLocaleString()}${suffix}` : "—";
@@ -165,36 +174,6 @@ export default async function ComparePage({ searchParams }: ComparePageProps) {
                   </th>
                 ))}
               </tr>
-              {/* שורת ציון סיכון */}
-              <tr>
-                <th className="sticky start-0 bg-white p-3 text-start text-xs font-bold text-[var(--color-text-subtle)] z-10">
-                  ציון סיכון
-                </th>
-                {found.map((f) => (
-                  <td
-                    key={f.plate}
-                    className={`p-3 text-center ${
-                      f.vehicle.riskScore === minRisk
-                        ? "bg-[var(--color-risk-good-bg)]"
-                        : ""
-                    }`}
-                  >
-                    <div className="flex flex-col items-center gap-1">
-                      <RiskBadge
-                        score={f.vehicle.riskScore}
-                        tone={f.vehicle.riskTone}
-                        size="sm"
-                        showLabel={false}
-                      />
-                      {f.vehicle.riskScore === minRisk && found.length > 1 && (
-                        <span className="text-[10px] font-bold text-[var(--color-success)]">
-                          ✓ הסיכון הנמוך
-                        </span>
-                      )}
-                    </div>
-                  </td>
-                ))}
-              </tr>
             </thead>
             <tbody>
               {rows.map((row, i) => (
@@ -217,8 +196,7 @@ export default async function ComparePage({ searchParams }: ComparePageProps) {
         </div>
 
         <p className="text-[11px] text-[var(--color-text-subtle)] mt-3 leading-tight">
-          שווי ועלות שנתית הם הערכות משוערות. ציון הסיכון מבוסס על נתונים ציבוריים
-          ואינו מחליף בדיקה פיזית.
+          שווי ועלות שנתית הם הערכות משוערות בלבד ואינם מחליפים בדיקה פיזית.
         </p>
       </div>
     </SiteShell>

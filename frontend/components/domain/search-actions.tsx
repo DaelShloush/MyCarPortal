@@ -14,8 +14,6 @@ interface SearchActionsProps {
     manufacturer: string;
     model: string;
     year: number;
-    riskScore: number;
-    riskTone: string;
   };
   vehicleData: {
     plate: string;

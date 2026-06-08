@@ -21,8 +21,6 @@
     "color": "לבן שנהב",
     "fuelType": "בנזין",
     "yad": 2,
-    "riskScore": 28,
-    "riskTone": "good",
     "owners": [...],
     "recalls": [...],
     "safety": {...}
