@@ -32,7 +32,7 @@ export function MobileBottomNav() {
               "flex flex-col items-center justify-center gap-0.5 text-[11px] font-medium transition-colors relative",
               isActive
                 ? "text-[var(--color-primary-600)]"
-                : "text-[var(--color-gray-400)] hover:text-[var(--color-gray-600)]"
+                : "text-[var(--color-gray-500)] hover:text-[var(--color-gray-700)]"
             )}
           >
             {tab.primary ? (

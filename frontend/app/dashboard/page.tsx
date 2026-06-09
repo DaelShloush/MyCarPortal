@@ -125,6 +125,7 @@ export default async function DashboardPage() {
                     fuelType: v.fuel_type ?? "",
                     yad: v.owner_count ?? 0,
                     testExpiryDate: v.test_expiry_date ?? "",
+                    testExpired: false,
                     insuranceExpiryDate: v.insurance_expiry_date ?? "",
                     daysToTestExpiry: v.test_expiry_date
                       ? daysLeft(v.test_expiry_date)

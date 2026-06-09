@@ -233,6 +233,7 @@ npm run lint         # ESLint
 | `GOOGLE_CLIENT_ID` / `GOOGLE_CLIENT_SECRET` | OAuth | התחברות Google (גם ב-Supabase) |
 | `SUPABASE_SERVICE_ROLE_KEY` | לתזכורות | cron קורא תזכורות חוצות-משתמשים |
 | `RESEND_API_KEY` | לתזכורות | שליחת אימייל |
+| `RESEND_FROM` | אופציונלי | כתובת השולח (ברירת מחדל: `onboarding@resend.dev`) |
 | `CRON_SECRET` | מומלץ | הקשחת `/api/reminders/check` |
 | `NEXT_PUBLIC_IMAGIN_CUSTOMER` | אופציונלי | מפתח imagin (ברירת מחדל: demo חינמי) |
 

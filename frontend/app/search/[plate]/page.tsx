@@ -159,13 +159,8 @@ export default async function SearchPage({ params }: SearchPageProps) {
     vehicle.kmAtLastTest
   );
   const costs = estimateCosts(vehicle);
-  // testExpiryDate בפורמט DD/MM/YYYY — בדיקה אם פג
-  const testExpired = (() => {
-    const m = vehicle.testExpiryDate?.match(/^(\d{2})\/(\d{2})\/(\d{4})$/);
-    if (!m) return false;
-    const expiry = new Date(Number(m[3]), Number(m[2]) - 1, Number(m[1]));
-    return expiry.getTime() < Date.now();
-  })();
+  // תוקף טסט — מחושב בשכבת הנתונים (vehicle-aggregator), לא בזמן render
+  const testExpired = vehicle.testExpired;
 
   // ===== פופולריות ואמינות הדגם =====
   const depreciationPct =

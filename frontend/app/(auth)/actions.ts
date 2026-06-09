@@ -27,15 +27,30 @@ export async function loginAction(formData: FormData) {
 
 export async function registerAction(formData: FormData) {
   const supabase = await createClient();
-  const { error } = await supabase.auth.signUp({
-    email: formData.get("email") as string,
-    password: formData.get("password") as string,
-    options: {
-      data: { name: formData.get("name") as string },
-    },
+  const email = (formData.get("email") as string)?.trim();
+  const password = formData.get("password") as string;
+  const name = (formData.get("name") as string)?.trim();
+
+  // ולידציית שרת (גיבוי לוולידציית הלקוח)
+  if (!email || !password || password.length < 8) {
+    redirect(
+      "/register?error=" +
+        encodeURIComponent("יש למלא אימייל וסיסמה בת 8 תווים לפחות")
+    );
+  }
+
+  const { data, error } = await supabase.auth.signUp({
+    email,
+    password,
+    options: { data: { name } },
   });
   if (error) {
     redirect(`/register?error=${encodeURIComponent(error.message)}`);
+  }
+
+  // אם אין session — Supabase מוגדר לאימות אימייל לפני התחברות
+  if (!data.session) {
+    redirect("/login?verify=1");
   }
   redirect("/dashboard");
 }

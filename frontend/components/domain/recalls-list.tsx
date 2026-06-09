@@ -18,6 +18,7 @@ export function RecallsList({ recalls }: RecallsListProps) {
   }
 
   return (
+    <>
     <ul className="space-y-2">
       {open.map((r) => (
         <li
@@ -40,5 +41,9 @@ export function RecallsList({ recalls }: RecallsListProps) {
         </li>
       ))}
     </ul>
+      <p className="text-[11px] text-[var(--color-text-subtle)] mt-2">
+        * מוצגים ריקולים <strong>פתוחים</strong> שדווחו במאגר משרד התחבורה. ייתכנו ריקולים שטופלו בעבר ואינם מופיעים כאן.
+      </p>
+    </>
   );
 }

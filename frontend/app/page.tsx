@@ -18,7 +18,7 @@ const FEATURES = [
   {
     icon: Wallet,
     title: "הערכת שווי ועלויות",
-    body: "שווי מוערך לפי שנה וקילומטראז׳, ועלות אחזקה שנתית — אגרה, דלק וטיפולים.",
+    body: "שווי מוערך לפי שנה וקילומטראז׳, ועלות אחזקה שנתית — אגרת רישוי ודלק.",
   },
   {
     icon: SearchIcon,
@@ -49,14 +49,14 @@ const FEATURES = [
 
 const STEPS = [
   { num: "01", title: "הזן מספר רישוי", body: "5–8 ספרות — בלי הרשמה ובלי תשלום." },
-  { num: "02", title: "אנחנו שולפים את הנתונים", body: "6 קריאות מקבילות ל-data.gov.il — תוך שניות." },
+  { num: "02", title: "אנחנו שולפים את הנתונים", body: "מספר קריאות מקבילות למאגרי data.gov.il — תוך שניות." },
   { num: "03", title: "מקבל את כל המידע", body: "הכל על עמוד אחד — בעלויות, טסט, ריקולים, בטיחות ושווי." },
 ];
 
-const SAMPLE_PREVIEWS = [
-  { plate: "2233445", make: "קיה", model: "SPORTAGE", year: 2020 },
-  { plate: "7788990", make: "סקודה", model: "OCTAVIA", year: 2018 },
-  { plate: "5556677", make: "מזדה", model: "3", year: 2012 },
+const PREVIEW_POINTS = [
+  { icon: FileText, label: "היסטוריית בעלויות, טסט וריקולים" },
+  { icon: Wallet, label: "הערכת שווי ועלות אחזקה" },
+  { icon: Star, label: "פופולריות ואמינות הדגם" },
 ];
 
 export default function LandingPage() {
@@ -90,29 +90,31 @@ export default function LandingPage() {
             <SearchInput className="bg-white" />
 
             <p className="text-xs text-white/60 mt-3 ms-1">
-              דוגמאות: 1234567 · 8901234 · 5556677
+              הזינו מספר רישוי בן 5–8 ספרות (ללא מקפים)
             </p>
           </div>
 
-          {/* תצוגה מקדימה צפה בצד */}
-          <div className="hidden lg:flex absolute end-6 top-1/2 -translate-y-1/2 flex-col gap-3 max-w-xs">
-            {SAMPLE_PREVIEWS.map((p) => (
-              <Link key={p.plate} href={`/search/${p.plate}`}>
-                <Card className="bg-white/95 backdrop-blur p-3 flex items-center gap-3 shadow-[var(--shadow-lg)] hover:bg-white transition-colors">
-                  <div className="w-10 h-10 shrink-0 rounded-lg bg-[var(--color-primary-50)] grid place-items-center text-[var(--color-primary-600)]">
-                    <SearchIcon size={18} />
-                  </div>
-                  <div className="text-sm">
-                    <div className="font-bold text-[var(--color-text)]">
-                      {p.make} {p.model}
-                    </div>
-                    <div className="text-xs text-[var(--color-text-subtle)] plate-text">
-                      {p.plate} · {p.year}
-                    </div>
-                  </div>
-                </Card>
-              </Link>
-            ))}
+          {/* כרטיס תצוגה ניטרלי — מה מקבלים (ללא נתוני דמו) */}
+          <div className="hidden lg:block absolute end-6 top-1/2 -translate-y-1/2 max-w-xs w-72">
+            <Card className="bg-white/95 backdrop-blur p-5 shadow-[var(--shadow-lg)]">
+              <div className="flex items-center gap-2 mb-3 text-[var(--color-primary-700)]">
+                <SearchIcon size={18} />
+                <span className="font-bold text-[var(--color-text)]">מה מקבלים בחיפוש</span>
+              </div>
+              <ul className="space-y-3">
+                {PREVIEW_POINTS.map((p) => {
+                  const Icon = p.icon;
+                  return (
+                    <li key={p.label} className="flex items-center gap-3 text-sm text-[var(--color-text)]">
+                      <span className="w-8 h-8 shrink-0 rounded-lg bg-[var(--color-primary-50)] grid place-items-center text-[var(--color-primary-600)]">
+                        <Icon size={16} />
+                      </span>
+                      {p.label}
+                    </li>
+                  );
+                })}
+              </ul>
+            </Card>
           </div>
         </div>
       </section>

@@ -136,6 +136,12 @@ function buildVehicle(params: {
   const kmAtLastTest = tech?.kilometer_test_aharon ?? 0;
   const testExpiryDate = main.tokef_dt ? formatDate(main.tokef_dt) : "";
   const testLastDate = main.mivchan_acharon_dt ? formatDate(main.mivchan_acharon_dt) : "";
+  // האם תוקף הרישיון פג — מחושב בשכבת הנתונים (לא בזמן render)
+  const testExpired = (() => {
+    const m = testExpiryDate.match(/^(\d{2})\/(\d{2})\/(\d{4})$/);
+    if (!m) return false;
+    return new Date(Number(m[3]), Number(m[2]) - 1, Number(m[1])).getTime() < Date.now();
+  })();
   const firstRegistrationDate = (tech?.rishum_rishon_dt ?? main.moed_aliya_lakvish)
     ? formatDate(tech?.rishum_rishon_dt ?? main.moed_aliya_lakvish)
     : "";
@@ -182,7 +188,7 @@ function buildVehicle(params: {
     engineCC: num(spec?.nefah_manoa),
     horsepower: num(spec?.koah_sus),
     drivetrain: spec?.technologiat_hanaa_nm ?? "",
-    gearbox: spec?.automatic_ind === 1 ? "אוטומטית" : spec ? "ידנית" : "",
+    gearbox: gearboxLabel(spec?.automatic_ind, !!spec),
     bodyType: spec?.merkav ? bodyTypeLabel(spec.merkav) : "",
     doors: num(spec?.mispar_dlatot),
     seats: num(spec?.mispar_moshavim),
@@ -192,6 +198,7 @@ function buildVehicle(params: {
     firstRegistrationDate,
     testLastDate,
     testExpiryDate,
+    testExpired,
     kmAtLastTest,
     structuralChange,
     colorChanged,
@@ -253,17 +260,28 @@ function buildOwners(records: OwnershipRecord[]): Owner[] {
   });
 }
 
+// data.gov.il מחזיר דגלים גם כ-number וגם כ-string — בדיקה גמישה אחת לכולם
+export function flag(v: unknown): boolean {
+  return v === "1" || v === "Y" || v === 1 || v === true;
+}
+
+// תווית תיבת הילוכים — "" כשאין מפרט (לא מציגים), אחרת לפי הדגל הגמיש
+export function gearboxLabel(automaticInd: unknown, hasSpec: boolean): string {
+  if (!hasSpec) return "";
+  return flag(automaticInd) ? "אוטומטית" : "ידנית";
+}
+
 function buildRecalls(records: RecallRecord[]): Recall[] {
-  return records.map((r) => ({
-    id: String(r.TAARICH_PTICHA ?? Math.random()),
+  return records.map((r, i) => ({
+    // id יציב (ללא Math.random) — תאריך פתיחה + תיאור + אינדקס
+    id: `${String(r.TAARICH_PTICHA ?? "")}-${String(r.TEUR_TAKALA ?? "").slice(0, 24)}-${i}`,
     description: r.TEUR_TAKALA ?? "",
     openedAt: String(r.TAARICH_PTICHA ?? "").slice(0, 4),
-    open: true,
+    open: true, // המאגר הוא "ריקולים פתוחים"
   }));
 }
 
 function buildSafety(spec?: ModelSpecRecord): SafetyFeatures {
-  const flag = (v: unknown) => v === "1" || v === "Y" || v === 1 || v === true;
   return {
     airbags: Number(spec?.mispar_kariot_avir ?? 0),
     abs: flag(spec?.abs_ind),

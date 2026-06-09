@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, type FormEvent } from "react";
 import Link from "next/link";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
@@ -15,6 +15,25 @@ interface AuthTabsProps {
 
 export function AuthTabs({ defaultTab = "login", error, notice }: AuthTabsProps) {
   const [tab, setTab] = useState<"login" | "register">(defaultTab);
+  const [pwError, setPwError] = useState<string | null>(null);
+
+  function validateRegister(e: FormEvent<HTMLFormElement>) {
+    const form = e.currentTarget;
+    const pw = (form.elements.namedItem("password") as HTMLInputElement)?.value ?? "";
+    const confirm =
+      (form.elements.namedItem("confirm_password") as HTMLInputElement)?.value ?? "";
+    if (pw.length < 8) {
+      e.preventDefault();
+      setPwError("הסיסמה חייבת להכיל לפחות 8 תווים");
+      return;
+    }
+    if (pw !== confirm) {
+      e.preventDefault();
+      setPwError("הסיסמאות אינן תואמות");
+      return;
+    }
+    setPwError(null);
+  }
 
   return (
     <div>
@@ -116,7 +135,7 @@ export function AuthTabs({ defaultTab = "login", error, notice }: AuthTabsProps)
         </form>
       ) : (
         /* Register form */
-        <form action={registerAction} className="space-y-4">
+        <form action={registerAction} onSubmit={validateRegister} className="space-y-4">
           <div>
             <label className="text-sm font-medium block mb-1.5">שם מלא</label>
             <Input name="name" placeholder="מאיר כהן" required />
@@ -135,6 +154,21 @@ export function AuthTabs({ defaultTab = "login", error, notice }: AuthTabsProps)
               required
             />
           </div>
+          <div>
+            <label className="text-sm font-medium block mb-1.5">אימות סיסמה</label>
+            <Input
+              type="password"
+              name="confirm_password"
+              placeholder="הקלד שוב את הסיסמה"
+              minLength={8}
+              required
+            />
+          </div>
+          {pwError && (
+            <p className="text-xs text-[var(--color-danger)]" role="alert">
+              {pwError}
+            </p>
+          )}
           <label className="flex items-start gap-2 text-sm">
             <input type="checkbox" className="mt-1" required />
             <span className="text-[var(--color-text-muted)]">

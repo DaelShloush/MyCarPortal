@@ -53,7 +53,7 @@ export function DocumentsManager({ vehicleId, userId, initialDocs, maxDocs }: Pr
     setBusy(true);
     try {
       const ext = file.name.split(".").pop() ?? "bin";
-      const path = `${userId}/${vehicleId}/${Date.now()}.${ext}`;
+      const path = `${userId}/${vehicleId}/${crypto.randomUUID()}.${ext}`;
 
       const { error: upErr } = await supabase.storage
         .from("documents")

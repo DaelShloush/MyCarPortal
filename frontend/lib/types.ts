@@ -64,6 +64,7 @@ export interface Vehicle {
   firstRegistrationDate: string;
   testLastDate: string;
   testExpiryDate: string;
+  testExpired: boolean;     // האם תוקף הרישיון פג (מחושב בשרת)
   kmAtLastTest: number;
   structuralChange: boolean;
   colorChanged: boolean;

@@ -13,6 +13,9 @@ const heebo = Heebo({
 });
 
 export const metadata: Metadata = {
+  metadataBase: new URL(
+    process.env.NEXT_PUBLIC_SITE_URL || "https://frontend-mycarportal.vercel.app"
+  ),
   title: "MyCarPortal — בדוק כל רכב בישראל תוך שניות",
   description:
     "פלטפורמה ישראלית לחיפוש ובדיקת רכבים פרטיים — היסטוריית בעלויות, טסט, ריקולים, הערכת שווי וניהול הרכב האישי שלך.",

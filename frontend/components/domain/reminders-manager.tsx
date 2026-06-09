@@ -181,6 +181,10 @@ export function RemindersManager({
         </p>
       )}
 
+      <p className="text-[11px] text-[var(--color-text-muted)] pt-1">
+        * התראות אימייל פעילות בכפוף להגדרת השרת (Resend + Cron).
+      </p>
+
       {toast && (
         <div className="fixed bottom-20 md:bottom-6 left-1/2 -translate-x-1/2 z-50 bg-[var(--color-gray-900)] text-white text-sm px-4 py-2.5 rounded-xl shadow-lg">
           {toast}

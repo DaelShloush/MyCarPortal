@@ -1,14 +1,15 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useSyncExternalStore } from "react";
 import Link from "next/link";
 import { Clock, Trash2, Info, Car } from "lucide-react";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import {
-  getGuestHistory,
   clearGuestHistory,
-  type GuestHistoryItem,
+  subscribeGuestHistory,
+  getGuestHistorySnapshot,
+  getGuestHistoryServerSnapshot,
 } from "@/lib/guest-history";
 
 function formatRelative(iso: string): string {
@@ -23,20 +24,17 @@ function formatRelative(iso: string): string {
 }
 
 export function GuestHistoryList() {
-  const [items, setItems] = useState<GuestHistoryItem[]>([]);
-  const [loaded, setLoaded] = useState(false);
-
-  useEffect(() => {
-    setItems(getGuestHistory());
-    setLoaded(true);
-  }, []);
+  // קריאה מ-localStorage דרך useSyncExternalStore — בלי setState ב-effect,
+  // ובלי אזהרות hydration (snapshot שרת = ריק, מתעדכן אוטומטית בצד לקוח)
+  const items = useSyncExternalStore(
+    subscribeGuestHistory,
+    getGuestHistorySnapshot,
+    getGuestHistoryServerSnapshot
+  );
 
   function handleClear() {
-    clearGuestHistory();
-    setItems([]);
+    clearGuestHistory(); // משדר אירוע → useSyncExternalStore מרענן
   }
-
-  if (!loaded) return null;
 
   return (
     <div>
