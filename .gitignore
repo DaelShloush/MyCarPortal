@@ -42,3 +42,6 @@ homework/
 MyCarPortal-wireframe/
 CLAUDE.md
 AGENTS.md
+
+# iCloud/Finder duplicate copies ("file 2.ts") — break tsc, never commit
+* 2.*

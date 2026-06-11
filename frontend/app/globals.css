@@ -229,6 +229,21 @@ body {
   background: var(--color-gray-400);
 }
 
+/* גיליון חיפוש עליון (SearchOverlay) — גלישה עדינה מלמעלה */
+@keyframes mcp-slide-down {
+  from {
+    transform: translateY(-12%);
+    opacity: 0;
+  }
+  to {
+    transform: translateY(0);
+    opacity: 1;
+  }
+}
+.mcp-slide-down {
+  animation: mcp-slide-down 0.18s ease-out;
+}
+
 /* ============================================================
    Skip link — accessibility
    ============================================================ */

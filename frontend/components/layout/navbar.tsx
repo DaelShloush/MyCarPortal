@@ -5,6 +5,7 @@ import { useEffect, useState } from "react";
 import { Car, Search, User, Menu, X, LogOut } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { SearchInput } from "@/components/domain/search-input";
+import { SearchOverlay } from "@/components/domain/search-overlay";
 import { createClient } from "@/lib/supabase/client";
 
 export interface NavUser {
@@ -26,6 +27,7 @@ interface NavbarProps {
 export function Navbar({ initialUser }: NavbarProps) {
   const [user, setUser] = useState<NavUser | null>(initialUser);
   const [menuOpen, setMenuOpen] = useState(false);
+  const [searchOpen, setSearchOpen] = useState(false);
 
   useEffect(() => {
     const supabase = createClient();
@@ -90,13 +92,16 @@ export function Navbar({ initialUser }: NavbarProps) {
 
         {/* Actions */}
         <div className="flex items-center gap-2 shrink-0">
-          <Link
-            href="/"
-            aria-label="חיפוש"
+          {/* חיפוש מיידי — פותח חלון עם מקלדת במקום ניווט לעמוד הבית */}
+          <button
+            type="button"
+            onClick={() => setSearchOpen(true)}
+            aria-label="חיפוש רכב לפי מספר רישוי"
+            aria-haspopup="dialog"
             className="lg:hidden w-10 h-10 grid place-items-center rounded-lg hover:bg-[var(--color-gray-100)]"
           >
             <Search size={20} className="text-[var(--color-gray-700)]" />
-          </Link>
+          </button>
 
           {user ? (
             <>
@@ -142,6 +147,8 @@ export function Navbar({ initialUser }: NavbarProps) {
           </button>
         </div>
       </div>
+
+      <SearchOverlay open={searchOpen} onClose={() => setSearchOpen(false)} />
 
       {/* Mobile dropdown menu */}
       {menuOpen && (

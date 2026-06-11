@@ -182,7 +182,7 @@ export default function LandingPage() {
             יש לך רכב? נהל אותו אצלנו.
           </h2>
           <p className="text-white/85 mb-6 max-w-lg mx-auto">
-            תזכורות לטסט וביטוח, היסטוריית טיפולים, ומסמכים דיגיטליים — הכל חינם.
+            היסטוריית טיפולים, מסמכים דיגיטליים ומעקב אחרי הרכבים שלך — הכל חינם.
           </p>
           <Link href="/register">
             <Button size="lg" variant="secondary" className="bg-white text-[var(--color-primary-700)] hover:bg-white/90">
