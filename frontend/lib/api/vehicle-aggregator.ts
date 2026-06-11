@@ -6,13 +6,16 @@ import type {
   TechnicalRecord,
   OwnershipRecord,
   RecallRecord,
+  RecallNoticeRecord,
+  DisabilityRecord,
+  PublicVehicleRecord,
   ModelSpecRecord,
   PriceRecord,
   PersonalImportRecord,
   ModelQuantityRecord,
 } from "./data-gov";
 import type { Vehicle, Owner, Recall, SafetyFeatures } from "../types";
-import { getManufacturerSlug } from "../manufacturer-logos";
+import { getManufacturerSlug, matchHebrewName } from "../manufacturer-logos";
 
 export interface VehicleApiResult {
   vehicle: Vehicle;
@@ -25,8 +28,8 @@ export async function fetchVehicleByPlate(
   const plateNum = parseInt(plate, 10);
   if (isNaN(plateNum)) return null;
 
-  // 7 parallel calls
-  const [mainRecords, extRecords, techRecords, ownerRecords, recallRecords, disabilityRecords, importRecords] =
+  // 8 parallel calls
+  const [mainRecords, extRecords, techRecords, ownerRecords, recallRecords, disabilityRecords, importRecords, publicRecords] =
     await Promise.all([
       queryDataGov(RESOURCES.ACTIVE_VEHICLES, { mispar_rechev: plateNum }, 1).catch(() => []),
       queryDataGov(RESOURCES.EXTENDED, { mispar_rechev: plateNum }, 1).catch(() => []),
@@ -35,6 +38,7 @@ export async function fetchVehicleByPlate(
       queryDataGov(RESOURCES.RECALLS, { MISPAR_RECHEV: plateNum }, 20).catch(() => []),
       queryDataGov(RESOURCES.DISABILITY_TAG, { "MISPAR RECHEV": plateNum }, 1).catch(() => []),
       queryDataGov(RESOURCES.PERSONAL_IMPORT, { mispar_rechev: plateNum }, 1).catch(() => []),
+      queryDataGov(RESOURCES.PUBLIC_VEHICLES, { mispar_rechev: plateNum }, 1).catch(() => []),
     ]);
 
   let source: VehicleApiResult["source"] = "active";
@@ -60,11 +64,15 @@ export async function fetchVehicleByPlate(
   const tech = techRecords[0] as unknown as TechnicalRecord | undefined;
   const owners = ownerRecords as unknown as OwnershipRecord[];
   const recalls = recallRecords as unknown as RecallRecord[];
-  const hasDisabilityTag = disabilityRecords.length > 0;
+  const disability = disabilityRecords[0] as unknown as DisabilityRecord | undefined;
   const importRec = importRecords[0] as unknown as PersonalImportRecord | undefined;
+  const publicRec = publicRecords[0] as unknown as PublicVehicleRecord | undefined;
 
-  // Calls 7-9 — model specs + official price + quantities (depend on main, run in parallel)
-  const [specRecords, priceRecords, quantityRecords] = await Promise.all([
+  // הודעות ריקול לפי דגם — הצלבה לפי RECALL_ID לקבלת אופן תיקון ויבואן
+  const recallIds = [...new Set(recalls.map((r) => r.RECALL_ID).filter(Boolean))];
+
+  // Calls 9-12 — model specs + official price + quantities + recall notices (depend on phase 1, run in parallel)
+  const [specRecords, priceRecords, quantityRecords, noticeRecords] = await Promise.all([
     queryDataGov(
       RESOURCES.MODEL_SPECS,
       {
@@ -92,11 +100,15 @@ export async function fetchVehicleByPlate(
       },
       100
     ).catch(() => []),
+    recallIds.length
+      ? queryDataGov(RESOURCES.RECALL_NOTICES, { RECALL_ID: recallIds }, 20).catch(() => [])
+      : Promise.resolve([]),
   ]);
   const spec = specRecords[0] as unknown as ModelSpecRecord | undefined;
   const price = priceRecords[0] as unknown as PriceRecord | undefined;
+  const notices = noticeRecords as unknown as RecallNoticeRecord[];
 
-  const vehicle = buildVehicle({ main, ext, tech, owners, recalls, hasDisabilityTag, spec, price, importRec, plate });
+  const vehicle = buildVehicle({ main, ext, tech, owners, recalls, notices, disability, spec, price, importRec, publicRec, plate });
   vehicle.status = source;
 
   // פופולריות ואמינות הדגם — סכום פעילים/לא-פעילים על פני כל שנות הייצור
@@ -123,13 +135,15 @@ function buildVehicle(params: {
   tech?: TechnicalRecord;
   owners: OwnershipRecord[];
   recalls: RecallRecord[];
-  hasDisabilityTag: boolean;
+  notices: RecallNoticeRecord[];
+  disability?: DisabilityRecord;
   spec?: ModelSpecRecord;
   price?: PriceRecord;
   importRec?: PersonalImportRecord;
+  publicRec?: PublicVehicleRecord;
   plate: string;
 }): Vehicle {
-  const { main, ext, tech, owners: rawOwners, recalls: rawRecalls, hasDisabilityTag, spec, price, importRec, plate } = params;
+  const { main, ext, tech, owners: rawOwners, recalls: rawRecalls, notices, disability, spec, price, importRec, publicRec, plate } = params;
 
   const manufacturerSlug = getManufacturerSlug(main.tozeret_nm ?? "");
   const year = main.shnat_yitzur ?? 0;
@@ -147,7 +161,7 @@ function buildVehicle(params: {
     : "";
 
   const owners = buildOwners(rawOwners);
-  const recalls = buildRecalls(rawRecalls);
+  const recalls = buildRecalls(rawRecalls, notices);
 
   const structuralChange = tech?.shinui_mivne_ind === "1" || tech?.shinui_mivne_ind === "Y";
   const colorChanged = tech?.shnui_zeva_ind === "1" || tech?.shnui_zeva_ind === "Y";
@@ -219,15 +233,32 @@ function buildVehicle(params: {
     propulsion: clean(spec?.technologiat_hanaa_nm),
     licenseFeeGroup: spec?.kvuzat_agra_cd != null ? num(spec.kvuzat_agra_cd) : undefined,
     originalPrice: price?.mehir != null ? num(price.mehir) : undefined,
+    // אבזור ונוחות — רק כשיש מפרט (אחרת undefined = "אין מידע", לא "אין מזגן")
+    hasAC: spec ? flag(spec.mazgan_ind) : undefined,
+    powerSteering: spec ? flag(spec.hege_koah_ind) : undefined,
+    electricWindows: spec?.mispar_halonot_hashmal != null ? num(spec.mispar_halonot_hashmal) : undefined,
     tireFront: main.zmig_kidmi ?? "",
     tireRear: main.zmig_ahori ?? "",
     loadFront: num(ext?.kod_omes_tzmig_kidmi),
+    loadRear: num(ext?.kod_omes_tzmig_ahori),
     speedRating: ext?.kod_mehirut_tzmig_kidmi ?? "",
-    hasDisabilityTag,
+    speedRatingRear: ext?.kod_mehirut_tzmig_ahori ?? "",
+    hasDisabilityTag: !!disability,
+    disabilityTagDate: formatTagDate(disability?.["TAARICH HAFAKAT TAG"]),
+    isPublicVehicle: !!publicRec,
+    publicVehicleType: clean(publicRec?.sug_rechev_nm),
     chassis: clean(main.misgeret),
     isPersonalImport: !!importRec,
     importType: clean(importRec?.sug_yevu),
   };
+}
+
+// תאריך הנפקת תג נכה: 20230419 → "04/2023"
+function formatTagDate(raw: number | undefined): string | undefined {
+  if (!raw) return undefined;
+  const s = String(raw);
+  if (s.length !== 8) return undefined;
+  return `${s.slice(4, 6)}/${s.slice(0, 4)}`;
 }
 
 function buildOwners(records: OwnershipRecord[]): Owner[] {
@@ -271,14 +302,21 @@ export function gearboxLabel(automaticInd: unknown, hasSpec: boolean): string {
   return flag(automaticInd) ? "אוטומטית" : "ידנית";
 }
 
-function buildRecalls(records: RecallRecord[]): Recall[] {
-  return records.map((r, i) => ({
-    // id יציב (ללא Math.random) — תאריך פתיחה + תיאור + אינדקס
-    id: `${String(r.TAARICH_PTICHA ?? "")}-${String(r.TEUR_TAKALA ?? "").slice(0, 24)}-${i}`,
-    description: r.TEUR_TAKALA ?? "",
-    openedAt: String(r.TAARICH_PTICHA ?? "").slice(0, 4),
-    open: true, // המאגר הוא "ריקולים פתוחים"
-  }));
+function buildRecalls(records: RecallRecord[], notices: RecallNoticeRecord[]): Recall[] {
+  const noticeById = new Map(notices.map((n) => [n.RECALL_ID, n]));
+  return records.map((r, i) => {
+    const notice = r.RECALL_ID != null ? noticeById.get(r.RECALL_ID) : undefined;
+    return {
+      // id יציב (ללא Math.random) — תאריך פתיחה + תיאור + אינדקס
+      id: `${String(r.TAARICH_PTICHA ?? "")}-${String(r.TEUR_TAKALA ?? "").slice(0, 24)}-${i}`,
+      description: r.TEUR_TAKALA ?? "",
+      openedAt: String(r.TAARICH_PTICHA ?? "").slice(0, 4),
+      fix: notice?.OFEN_TIKUN || undefined,
+      importer: notice?.YEVUAN_TEUR || undefined,
+      phone: notice?.TELEPHONE || undefined,
+      open: true, // המאגר הוא "ריקולים פתוחים"
+    };
+  });
 }
 
 function buildSafety(spec?: ModelSpecRecord): SafetyFeatures {
@@ -300,6 +338,7 @@ function buildSafety(spec?: ModelSpecRecord): SafetyFeatures {
     tirePressure: flag(spec?.hayshaney_lahatz_avir_batzmigim_ind),
     seatbeltReminder: flag(spec?.hayshaney_hagorot_ind),
     reverseAeb: flag(spec?.blima_otomatit_nesia_leahor),
+    autoLightsForward: flag(spec?.teura_automatit_benesiya_kadima_ind),
     equipLevel: spec?.ramat_eivzur_betihuty != null
       ? Number(spec.ramat_eivzur_betihuty)
       : undefined,
@@ -325,21 +364,26 @@ function bodyTypeLabel(merkav: string): string {
   return map[merkav] ?? merkav;
 }
 
+// ארץ המותג (לא ארץ הייצור — "רנו טורקיה" היא רנו צרפתית שיוצרה בטורקיה)
+const BRAND_COUNTRY: Record<string, string> = {
+  "טויוטה": "יפן", "הונדה": "יפן", "מזדה": "יפן", "מיצובישי": "יפן", "סובארו": "יפן", "ניסאן": "יפן",
+  "קיה": "קוריאה", "יונדאי": "קוריאה",
+  "פולקסווגן": "גרמניה", "אאודי": "גרמניה", "מרצדס": "גרמניה", "ב.מ.וו": "גרמניה", "אופל": "גרמניה",
+  "פורד": "ארה״ב", "שברולט": "ארה״ב", "ג׳יפ": "ארה״ב", "טסלה": "ארה״ב",
+  "פיאט": "איטליה", "אלפא רומיאו": "איטליה",
+  "סיטרואן": "צרפת", "פיג׳ו": "צרפת", "רנו": "צרפת",
+  "סקודה": "צ׳כיה", "סיאט": "ספרד",
+  "וולוו": "שוודיה", "וולבו": "שוודיה",
+};
+
+// ממוין מהארוך לקצר — עקבי עם הלוגיקה של הלוגו
+const BRAND_COUNTRY_KEYS = Object.keys(BRAND_COUNTRY).sort((a, b) => b.length - a.length);
+
 function countryFromManufacturer(name: string): string {
-  const map: Record<string, string> = {
-    "טויוטה": "יפן", "הונדה": "יפן", "מזדה": "יפן", "מיצובישי": "יפן", "סובארו": "יפן", "ניסאן": "יפן",
-    "קיה": "קוריאה", "יונדאי": "קוריאה",
-    "פולקסווגן": "גרמניה", "אאודי": "גרמניה", "מרצדס": "גרמניה", "ב.מ.וו": "גרמניה", "אופל": "גרמניה",
-    "פורד": "ארה״ב", "שברולט": "ארה״ב", "ג׳יפ": "ארה״ב", "טסלה": "ארה״ב",
-    "פיאט": "איטליה", "אלפא רומיאו": "איטליה",
-    "סיטרואן": "צרפת", "פיג׳ו": "צרפת", "רנו": "צרפת",
-    "סקודה": "צ׳כיה", "סיאט": "ספרד",
-    "וולוו": "שוודיה",
-  };
-  for (const [key, country] of Object.entries(map)) {
-    if (name.includes(key)) return country;
-  }
-  return "";
+  // התאמת תחילת-מילה (matchHebrewName) ולא includes — אחרת "רנו טורקיה"
+  // מקבלת "קוריאה" כי "טורקיה" מסתיימת ב"קיה"
+  const key = matchHebrewName(name, BRAND_COUNTRY_KEYS);
+  return key ? BRAND_COUNTRY[key] : "";
 }
 
 

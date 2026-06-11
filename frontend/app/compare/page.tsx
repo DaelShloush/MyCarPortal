@@ -6,7 +6,7 @@ import { ManufacturerLogo } from "@/components/domain/manufacturer-logo";
 import { fetchVehicleByPlate } from "@/lib/api/vehicle-aggregator";
 import { estimateCurrentValue } from "@/lib/value-estimator";
 import { estimateCosts } from "@/lib/cost-estimator";
-import { createClient } from "@/lib/supabase/server";
+import { createClient, getUser } from "@/lib/supabase/server";
 import type { Vehicle } from "@/lib/types";
 
 interface ComparePageProps {
@@ -18,7 +18,7 @@ export default async function ComparePage({ searchParams }: ComparePageProps) {
 
   // מגבלת השוואה — חינם עד 2, פרמיום עד 4
   const supabase = await createClient();
-  const { data: { user } } = await supabase.auth.getUser();
+  const user = await getUser();
   let isPremium = false;
   if (user) {
     const { data: profile } = await supabase

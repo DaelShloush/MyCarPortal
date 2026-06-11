@@ -5,7 +5,7 @@ import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
-import { createClient } from "@/lib/supabase/server";
+import { createClient, getUser } from "@/lib/supabase/server";
 import { updateProfileAction, upgradeToPremiumAction } from "@/app/actions/profile";
 import { logoutAction } from "@/app/(auth)/actions";
 
@@ -15,7 +15,7 @@ interface SettingsPageProps {
 
 export default async function SettingsPage({ searchParams }: SettingsPageProps) {
   const supabase = await createClient();
-  const { data: { user } } = await supabase.auth.getUser();
+  const user = await getUser();
   if (!user) return <AuthRequired feature="ההגדרות" />;
 
   const { data: profile } = await supabase

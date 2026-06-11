@@ -3,7 +3,7 @@ import { Clock, Car } from "lucide-react";
 import { SiteShell } from "@/components/layout/site-shell";
 import { Card } from "@/components/ui/card";
 import { GuestHistoryList } from "@/components/domain/guest-history-list";
-import { createClient } from "@/lib/supabase/server";
+import { createClient, getUser } from "@/lib/supabase/server";
 
 function formatRelative(iso: string): string {
   const d = new Date(iso);
@@ -18,7 +18,7 @@ function formatRelative(iso: string): string {
 
 export default async function HistoryPage() {
   const supabase = await createClient();
-  const { data: { user } } = await supabase.auth.getUser();
+  const user = await getUser();
 
   // אורח — מציג היסטוריה מ-localStorage
   if (!user) {

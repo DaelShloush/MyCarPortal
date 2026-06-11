@@ -15,6 +15,7 @@ const FEATURES: { key: keyof SafetyFeatures; label: string }[] = [
   { key: "emergencyBrake", label: "מערכת עזר לבלימה" },
   { key: "blindSpot", label: "זיהוי שטח מת" },
   { key: "autoLights", label: "אורות גבוהים אוטומטיים" },
+  { key: "autoLightsForward", label: "תאורה אוטומטית בנסיעה קדימה" },
   { key: "adaptiveCruise", label: "בקרת שיוט אדפטיבית" },
   { key: "trafficSignRecognition", label: "זיהוי תמרורים" },
   { key: "tirePressure", label: "חיישני לחץ אוויר" },

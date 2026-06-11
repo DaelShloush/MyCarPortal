@@ -27,7 +27,7 @@ import { DocumentsManager } from "@/components/domain/documents-manager";
 import { RemindersManager } from "@/components/domain/reminders-manager";
 import { SaleAdGenerator } from "@/components/domain/sale-ad-generator";
 import { InsuranceEditor } from "@/components/domain/insurance-editor";
-import { createClient } from "@/lib/supabase/server";
+import { createClient, getUser } from "@/lib/supabase/server";
 import { getManufacturerSlug } from "@/lib/manufacturer-logos";
 
 interface VehicleDetailProps {
@@ -73,9 +73,7 @@ export default async function VehicleDetailPage({ params }: VehicleDetailProps) 
   const supabase = await createClient();
 
   // auth check
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
+  const user = await getUser();
   if (!user) return <AuthRequired feature="הרכב הזה" />;
 
   // fetch all data in parallel

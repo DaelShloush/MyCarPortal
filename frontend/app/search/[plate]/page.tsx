@@ -14,6 +14,9 @@ import {
   ExternalLink,
   Tag,
   Wallet,
+  AirVent,
+  CarTaxiFront,
+  Gauge,
 } from "lucide-react";
 import { SiteShell } from "@/components/layout/site-shell";
 import { Section, InfoRow } from "@/components/ui/section";
@@ -26,8 +29,11 @@ import { SafetyGrid } from "@/components/domain/safety-grid";
 import { SearchActions } from "@/components/domain/search-actions";
 import { SearchHistoryTracker } from "@/components/domain/search-history-tracker";
 import { CompareInput } from "@/components/domain/compare-input";
+import { SectionNav } from "@/components/domain/section-nav";
+import { VehicleScoreCard } from "@/components/domain/vehicle-score";
+import { computeVehicleScore } from "@/lib/vehicle-score";
 import { fetchVehicleByPlate } from "@/lib/api/vehicle-aggregator";
-import { createClient } from "@/lib/supabase/server";
+import { getUser } from "@/lib/supabase/server";
 import { isFavoriteAction } from "@/app/actions/favorites";
 import { estimateCurrentValue } from "@/lib/value-estimator";
 import { estimateCosts } from "@/lib/cost-estimator";
@@ -184,9 +190,23 @@ export default async function SearchPage({ params }: SearchPageProps) {
     return { label: "נדיר", variant: "warning" as const };
   })();
 
+  // דגל "בעלויות קצרות" — בעלים פרטיים שהחזיקו ברכב פחות משנה (סוחר מחזיק קצר באופן טבעי)
+  const shortOwnerships = vehicle.owners.filter(
+    (o) => o.type === "פרטי" && o.durationMonths != null && o.durationMonths < 12
+  ).length;
+
+  // האם קבוצת "שווי ועלויות" תוצג בכלל (רכבים ישנים ללא מפרט/מחירון — לא)
+  const hasValueGroup =
+    !!vehicle.originalPrice ||
+    !!costs ||
+    vehicle.modelActiveCount != null ||
+    depreciationPct != null;
+
+  // ציון הרכב — שקלול כל דגלי האזהרה לציון 0-100 עם פירוט שקוף
+  const scoreResult = computeVehicleScore(vehicle);
+
   // בדיקת מצב מועדפים (שמירת ההיסטוריה מתבצעת ב-SearchHistoryTracker)
-  const supabase = await createClient();
-  const { data: { user } } = await supabase.auth.getUser();
+  const user = await getUser();
   let initialIsFavorite = false;
   if (user) {
     initialIsFavorite = await isFavoriteAction(plate);
@@ -270,6 +290,22 @@ export default async function SearchPage({ params }: SearchPageProps) {
             </div>
           </div>
         )}
+        {vehicle.isPublicVehicle && (
+          <div className="rounded-xl bg-[var(--color-risk-warn-bg)] border border-[var(--color-risk-warn-border)] p-4 flex items-start gap-3">
+            <CarTaxiFront size={22} className="text-[var(--color-warning)] shrink-0 mt-0.5" />
+            <div>
+              <p className="font-bold text-[var(--color-risk-warn-text)]">
+                רכב זה רשום במאגר הרכבים הציבוריים
+                {vehicle.publicVehicleType ? ` — ${vehicle.publicVehicleType}` : ""}
+              </p>
+              <p className="text-sm text-[var(--color-risk-warn-text)] mt-0.5">
+                רכב ששימש כרכב ציבורי (מונית / הסעות) צובר בדרך כלל קילומטראז׳ ושחיקה
+                גבוהים משמעותית מרכב פרטי. אם הרכב מוצע לך למכירה כרכב פרטי — מומלץ
+                לבדוק את ההיסטוריה לעומק לפני רכישה.
+              </p>
+            </div>
+          </div>
+        )}
 
         {/* ===== HEADER / HERO ===== */}
         <div className="space-y-4">
@@ -341,8 +377,138 @@ export default async function SearchPage({ params }: SearchPageProps) {
           />
         </div>
 
+        {/* ===== ניווט מהיר בין סקשנים (נייד בלבד) ===== */}
+        <SectionNav hide={hasValueGroup ? [] : ["#value"]} />
+
         {/* ===== השוואה לרכב אחר ===== */}
         <CompareInput currentPlate={vehicle.plate} />
+
+        {/* ╔══ קבוצה א׳: היסטוריה ובדיקות — הנתונים הקריטיים לקנייה ══╗ */}
+        <GroupHeading emoji="🔍" title="היסטוריה ובדיקות" />
+
+        {/* ===== בעלויות ===== */}
+        <Section
+          id="ownership"
+          className="scroll-mt-28 md:scroll-mt-24"
+          title="בעלויות"
+          icon={<Users size={16} />}
+        >
+          {vehicle.owners.length > 0 ? (
+            <>
+              <div className="mb-4 flex items-center gap-2">
+                <span className="text-sm text-[var(--color-text-subtle)]">מספר בעלים:</span>
+                <span className="text-2xl font-black text-[var(--color-primary-700)]">
+                  {vehicle.owners.length}
+                </span>
+              </div>
+              <OwnershipTimeline owners={vehicle.owners} />
+              {vehicle.owners[0]?.type === "החכר (ליסינג)" && (
+                <p className="mt-4 text-xs text-[var(--color-warning)] flex items-center gap-1">
+                  <AlertTriangle size={14} />
+                  הרכב התחיל את חייו כליסינג — שווה לבדוק קילומטראז׳
+                </p>
+              )}
+              {shortOwnerships >= 2 && (
+                <p className="mt-2 text-xs text-[var(--color-warning)] flex items-center gap-1">
+                  <AlertTriangle size={14} />
+                  {shortOwnerships} בעלים פרטיים החזיקו ברכב פחות משנה — דפוס שמצדיק
+                  בדיקה מעמיקה לפני רכישה
+                </p>
+              )}
+            </>
+          ) : (
+            <p className="text-sm text-[var(--color-text-subtle)] flex items-start gap-1.5">
+              <Info size={15} className="shrink-0 mt-0.5" />
+              היסטוריית בעלויות זמינה רק לרכבים מ-2017 ואילך. עבור רכב זה אין נתוני בעלויות במאגר.
+            </p>
+          )}
+        </Section>
+
+        {/* ===== רישוי, טסט וקילומטראז׳ ===== */}
+        <Section
+          id="test"
+          className="scroll-mt-28 md:scroll-mt-24"
+          title="רישוי, טסט וקילומטראז׳"
+          icon={<ClipboardCheck size={16} />}
+        >
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-x-6">
+            <InfoRow
+              label="מבחן רישוי אחרון"
+              value={
+                noPeriodicTestYet ? (
+                  <span className="text-[var(--color-text-subtle)]">
+                    טרם נדרש (רכב עד גיל 3)
+                  </span>
+                ) : (
+                  vehicle.testLastDate || "—"
+                )
+              }
+            />
+            <InfoRow
+              label="רישיון בתוקף עד"
+              value={
+                vehicle.testExpiryDate ? (
+                  testExpired ? (
+                    <span className="text-[var(--color-danger)] font-bold">
+                      {vehicle.testExpiryDate} ✗ (פג)
+                    </span>
+                  ) : (
+                    <span className="text-[var(--color-success)] font-bold">
+                      {vehicle.testExpiryDate} ✓
+                    </span>
+                  )
+                ) : (
+                  "—"
+                )
+              }
+            />
+            {vehicle.kmAtLastTest > 0 && (
+              <InfoRow label="ק״מ במבחן אחרון" value={vehicle.kmAtLastTest.toLocaleString()} />
+            )}
+            {vehicle.kmAtLastTest > 0 && (
+              <InfoRow
+                label='ממוצע ק"מ לשנה'
+                value={Math.round(
+                  vehicle.kmAtLastTest / Math.max(1, vehicleAge)
+                ).toLocaleString()}
+              />
+            )}
+            <InfoRow
+              label="שינוי מבנה"
+              value={vehicle.structuralChange ? <Badge variant="danger">כן</Badge> : <Badge variant="success">לא</Badge>}
+            />
+            <InfoRow
+              label="שינוי צבע"
+              value={vehicle.colorChanged ? <Badge variant="warning">כן</Badge> : <Badge variant="success">לא</Badge>}
+            />
+            <InfoRow
+              label="וו גרירה"
+              value={vehicle.towHook ? <Badge variant="warning">יש</Badge> : <Badge variant="success">אין</Badge>}
+            />
+            <InfoRow
+              label="שינוי צמיגים"
+              value={vehicle.tireChanged ? <Badge variant="warning">כן</Badge> : <Badge variant="success">לא</Badge>}
+            />
+          </div>
+          <p className="text-[11px] text-[var(--color-text-subtle)] mt-3 leading-tight">
+            ℹ️ התאריך מבוסס על <strong>תוקף רישיון הרכב</strong> ממשרד התחבורה — זהו
+            המועד שעד אליו הרכב חוקי לנסיעה (והמועד לחידוש הרישיון + מבחן הרישוי
+            הבא). רכב פרטי חדש פטור ממבחן רישוי בשלוש שנותיו הראשונות.
+          </p>
+        </Section>
+
+        {/* ===== ריקולים ===== */}
+        <Section
+          id="recalls"
+          className="scroll-mt-28 md:scroll-mt-24"
+          title="ריקולים"
+          icon={<AlertTriangle size={16} />}
+        >
+          <RecallsList recalls={vehicle.recalls} />
+        </Section>
+
+        {/* ╔══ קבוצה ב׳: שווי ועלויות ══╗ */}
+        {hasValueGroup && <GroupHeading id="value" emoji="💰" title="שווי ועלויות" />}
 
         {/* ===== הערכת שווי ===== */}
         {vehicle.originalPrice ? (
@@ -513,7 +679,10 @@ export default async function SearchPage({ params }: SearchPageProps) {
           </Section>
         )}
 
-        {/* ===== 1. פרטים כלליים ===== */}
+        {/* ╔══ קבוצה ג׳: מפרט ואבזור ══╗ */}
+        <GroupHeading id="specs" emoji="🚗" title="מפרט ואבזור" />
+
+        {/* ===== פרטים כלליים ===== */}
         <Section title="פרטים כלליים" icon={<Info size={16} />}>
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-x-6">
             <InfoRow label="יצרן" value={`${vehicle.manufacturer} (${vehicle.manufacturerCountry})`} />
@@ -543,16 +712,33 @@ export default async function SearchPage({ params }: SearchPageProps) {
               label="תג נכה"
               value={
                 vehicle.hasDisabilityTag ? (
-                  <Badge variant="warning">רשום</Badge>
+                  <span className="flex items-center gap-1.5">
+                    <Badge variant="warning">רשום</Badge>
+                    {vehicle.disabilityTagDate && (
+                      <span className="text-xs text-[var(--color-text-subtle)]">
+                        הונפק {vehicle.disabilityTagDate}
+                      </span>
+                    )}
+                  </span>
                 ) : (
                   <Badge variant="default">לא רשום</Badge>
+                )
+              }
+            />
+            <InfoRow
+              label="רישום כרכב ציבורי"
+              value={
+                vehicle.isPublicVehicle ? (
+                  <Badge variant="danger">{vehicle.publicVehicleType ?? "רשום"}</Badge>
+                ) : (
+                  <Badge variant="default">לא</Badge>
                 )
               }
             />
           </div>
         </Section>
 
-        {/* ===== 2. מנוע ומפרט טכני ===== */}
+        {/* ===== מנוע ומפרט טכני ===== */}
         <Section title="מנוע ומפרט טכני" icon={<Cog size={16} />}>
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-x-6">
             {vehicle.engineCC > 0 && (
@@ -584,111 +770,42 @@ export default async function SearchPage({ params }: SearchPageProps) {
           </div>
         </Section>
 
-        {/* ===== 3. בעלויות ===== */}
-        <Section title="בעלויות" icon={<Users size={16} />}>
-          {vehicle.owners.length > 0 ? (
-            <>
-              <div className="mb-4 flex items-center gap-2">
-                <span className="text-sm text-[var(--color-text-subtle)]">מספר בעלים:</span>
-                <span className="text-2xl font-black text-[var(--color-primary-700)]">
-                  {vehicle.owners.length}
-                </span>
-              </div>
-              <OwnershipTimeline owners={vehicle.owners} />
-              {vehicle.owners[0]?.type === "החכר (ליסינג)" && (
-                <p className="mt-4 text-xs text-[var(--color-warning)] flex items-center gap-1">
-                  <AlertTriangle size={14} />
-                  הרכב התחיל את חייו כליסינג — שווה לבדוק קילומטראז׳
-                </p>
+        {/* ===== אבזור ונוחות ===== */}
+        {(vehicle.hasAC !== undefined ||
+          vehicle.powerSteering !== undefined ||
+          (vehicle.electricWindows ?? 0) > 0) && (
+          <Section title="אבזור ונוחות" icon={<AirVent size={16} />}>
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-x-6">
+              {vehicle.hasAC !== undefined && (
+                <InfoRow
+                  label="מזגן"
+                  value={vehicle.hasAC ? <Badge variant="success">יש</Badge> : <Badge variant="default">אין</Badge>}
+                />
               )}
-            </>
-          ) : (
-            <p className="text-sm text-[var(--color-text-subtle)] flex items-start gap-1.5">
-              <Info size={15} className="shrink-0 mt-0.5" />
-              היסטוריית בעלויות זמינה רק לרכבים מ-2017 ואילך. עבור רכב זה אין נתוני בעלויות במאגר.
-            </p>
-          )}
-        </Section>
+              {vehicle.powerSteering !== undefined && (
+                <InfoRow
+                  label="הגה כוח"
+                  value={vehicle.powerSteering ? <Badge variant="success">יש</Badge> : <Badge variant="default">אין</Badge>}
+                />
+              )}
+              {(vehicle.electricWindows ?? 0) > 0 && (
+                <InfoRow label="חלונות חשמל" value={vehicle.electricWindows} />
+              )}
+            </div>
+          </Section>
+        )}
 
-        {/* ===== 4. טסט וקילומטראז׳ ===== */}
-        <Section title="רישוי, טסט וקילומטראז׳" icon={<ClipboardCheck size={16} />}>
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-x-6">
-            <InfoRow
-              label="מבחן רישוי אחרון"
-              value={
-                noPeriodicTestYet ? (
-                  <span className="text-[var(--color-text-subtle)]">
-                    טרם נדרש (רכב עד גיל 3)
-                  </span>
-                ) : (
-                  vehicle.testLastDate || "—"
-                )
-              }
-            />
-            <InfoRow
-              label="רישיון בתוקף עד"
-              value={
-                vehicle.testExpiryDate ? (
-                  testExpired ? (
-                    <span className="text-[var(--color-danger)] font-bold">
-                      {vehicle.testExpiryDate} ✗ (פג)
-                    </span>
-                  ) : (
-                    <span className="text-[var(--color-success)] font-bold">
-                      {vehicle.testExpiryDate} ✓
-                    </span>
-                  )
-                ) : (
-                  "—"
-                )
-              }
-            />
-            {vehicle.kmAtLastTest > 0 && (
-              <InfoRow label="ק״מ במבחן אחרון" value={vehicle.kmAtLastTest.toLocaleString()} />
-            )}
-            {vehicle.kmAtLastTest > 0 && (
-              <InfoRow
-                label='ממוצע ק"מ לשנה'
-                value={Math.round(
-                  vehicle.kmAtLastTest / Math.max(1, vehicleAge)
-                ).toLocaleString()}
-              />
-            )}
-            <InfoRow
-              label="שינוי מבנה"
-              value={vehicle.structuralChange ? <Badge variant="danger">כן</Badge> : <Badge variant="success">לא</Badge>}
-            />
-            <InfoRow
-              label="שינוי צבע"
-              value={vehicle.colorChanged ? <Badge variant="warning">כן</Badge> : <Badge variant="success">לא</Badge>}
-            />
-            <InfoRow
-              label="וו גרירה"
-              value={vehicle.towHook ? <Badge variant="warning">יש</Badge> : <Badge variant="success">אין</Badge>}
-            />
-            <InfoRow
-              label="שינוי צמיגים"
-              value={vehicle.tireChanged ? <Badge variant="warning">כן</Badge> : <Badge variant="success">לא</Badge>}
-            />
-          </div>
-          <p className="text-[11px] text-[var(--color-text-subtle)] mt-3 leading-tight">
-            ℹ️ התאריך מבוסס על <strong>תוקף רישיון הרכב</strong> ממשרד התחבורה — זהו
-            המועד שעד אליו הרכב חוקי לנסיעה (והמועד לחידוש הרישיון + מבחן הרישוי
-            הבא). רכב פרטי חדש פטור ממבחן רישוי בשלוש שנותיו הראשונות.
-          </p>
-        </Section>
-
-        {/* ===== 5. ריקולים ===== */}
-        <Section title="ריקולים" icon={<AlertTriangle size={16} />}>
-          <RecallsList recalls={vehicle.recalls} />
-        </Section>
-
-        {/* ===== 6. בטיחות ===== */}
-        <Section title="בטיחות ומערכות סיוע" icon={<ShieldCheck size={16} />}>
+        {/* ===== בטיחות ===== */}
+        <Section
+          id="safety"
+          className="scroll-mt-28 md:scroll-mt-24"
+          title="בטיחות ומערכות סיוע"
+          icon={<ShieldCheck size={16} />}
+        >
           <SafetyGrid safety={vehicle.safety} />
         </Section>
 
-        {/* ===== 7. סביבה ופליטות ===== */}
+        {/* ===== סביבה ופליטות ===== */}
         <Section title="סביבה ופליטות" icon={<Leaf size={16} />}>
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-x-6">
             {vehicle.greenScore > 0 && (
@@ -721,17 +838,45 @@ export default async function SearchPage({ params }: SearchPageProps) {
           </div>
         </Section>
 
-        {/* ===== 8. צמיגים ===== */}
+        {/* ===== צמיגים ===== */}
         <Section title="צמיגים" icon={<Disc3 size={16} />}>
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-x-6">
             <InfoRow label="צמיג קדמי" value={vehicle.tireFront} />
             <InfoRow label="צמיג אחורי" value={vehicle.tireRear} />
-            <InfoRow label="עומס קדמי" value={vehicle.loadFront} />
-            <InfoRow label="דירוג מהירות" value={vehicle.speedRating} />
+            {vehicle.loadFront > 0 && (
+              <InfoRow
+                label="קוד עומס (קדמי / אחורי)"
+                value={
+                  vehicle.loadRear > 0 && vehicle.loadRear !== vehicle.loadFront
+                    ? `${vehicle.loadFront} / ${vehicle.loadRear}`
+                    : vehicle.loadFront
+                }
+              />
+            )}
+            {vehicle.speedRating && (
+              <InfoRow
+                label="דירוג מהירות (קדמי / אחורי)"
+                value={
+                  vehicle.speedRatingRear && vehicle.speedRatingRear !== vehicle.speedRating
+                    ? `${vehicle.speedRating} / ${vehicle.speedRatingRear}`
+                    : vehicle.speedRating
+                }
+              />
+            )}
           </div>
         </Section>
 
-        {/* ===== 9. קישורים שימושיים ===== */}
+        {/* ===== ציון הרכב — סיכום כל הבדיקות, בתחתית אחרי שראו את הנתונים ===== */}
+        <Section
+          id="score"
+          className="scroll-mt-28 md:scroll-mt-24"
+          title="ציון הרכב"
+          icon={<Gauge size={16} />}
+        >
+          <VehicleScoreCard result={scoreResult} />
+        </Section>
+
+        {/* ===== קישורים שימושיים ===== */}
         <Section title="קישורים שימושיים" icon={<ExternalLink size={16} />}>
           <ul className="space-y-2">
             {[
@@ -829,5 +974,20 @@ export default async function SearchPage({ params }: SearchPageProps) {
         </div>
       </div>
     </SiteShell>
+  );
+}
+
+// כותרת קבוצה — מפרידה ויזואלית בין שלוש קבוצות התוכן של הדוח
+function GroupHeading({ id, emoji, title }: { id?: string; emoji: string; title: string }) {
+  return (
+    <div id={id} className="flex items-center gap-3 pt-3 scroll-mt-28 md:scroll-mt-24">
+      <h2 className="text-lg font-black text-[var(--color-gray-900)] shrink-0">
+        <span aria-hidden="true" className="me-1.5">
+          {emoji}
+        </span>
+        {title}
+      </h2>
+      <div className="h-px flex-1 bg-[var(--color-border)]" aria-hidden="true" />
+    </div>
   );
 }

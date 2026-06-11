@@ -10,13 +10,19 @@ interface SiteShellProps {
 /**
  * SiteShell — Layout wrapper משותף לכל עמוד.
  * Navbar למעלה, Footer למטה (דסקטופ), Bottom Nav במובייל.
- * שולף את המשתמש ב-SSR ומעביר ל-Navbar כדי למנוע הבהוב של כפתורי auth.
+ *
+ * מצב המשתמש ל-Navbar נקרא מה-session המקומי (cookie) ולא דרך getUser() —
+ * getUser() יוצא לרשת ל-Supabase Auth בכל עמוד (~60-300ms) והאט כל ניווט.
+ * זה בטוח כאן: ה-Navbar רק *מציג* שם משתמש; כל גישה לנתונים מוגנת ב-RLS,
+ * ועמודים מוגנים עושים getUser() אמיתי בעצמם. בנוסף ה-Navbar מתעדכן
+ * client-side דרך onAuthStateChange.
  */
 export async function SiteShell({ children }: SiteShellProps) {
   const supabase = await createClient();
   const {
-    data: { user },
-  } = await supabase.auth.getUser();
+    data: { session },
+  } = await supabase.auth.getSession();
+  const user = session?.user;
 
   const initialUser: NavUser | null = user
     ? {

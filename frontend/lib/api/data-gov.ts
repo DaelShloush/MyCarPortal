@@ -14,7 +14,8 @@ export interface DataGovResponse {
 
 export async function queryDataGov(
   resourceId: string,
-  filters: Record<string, string | number>,
+  // CKAN תומך גם בערך-מערך לסינון לפי כמה ערכים בבת אחת ({"RECALL_ID":[1,2]})
+  filters: Record<string, string | number | Array<string | number>>,
   limit = 100
 ): Promise<DataGovRecord[]> {
   const params = new URLSearchParams({
@@ -26,6 +27,62 @@ export async function queryDataGov(
   const res = await fetch(`${DATA_GOV_BASE}?${params}`, {
     headers: { "User-Agent": "MyCarPortal/1.0" },
     next: { revalidate: 3600 },
+  });
+
+  if (!res.ok) throw new Error(`data.gov.il error: ${res.status}`);
+
+  const json: DataGovResponse = await res.json();
+  if (!json.success) throw new Error("data.gov.il returned success:false");
+
+  return json.result.records;
+}
+
+// ─── שאילתות סטטיסטיקה (עמוד הבית) — cache יומי ─────────────────
+
+/**
+ * סופר רשומות התואמות filter בלי למשוך אותן (limit=0, קוראים רק את total).
+ * CKAN מחזיר total מדויק על כל המאגר — כך אפשר "כמה רכבים חשמליים יש" בקריאה אחת.
+ */
+export async function queryDataGovCount(
+  resourceId: string,
+  filters?: Record<string, string | number>
+): Promise<number> {
+  const params = new URLSearchParams({
+    resource_id: resourceId,
+    limit: "0",
+  });
+  if (filters) params.set("filters", JSON.stringify(filters));
+
+  const res = await fetch(`${DATA_GOV_BASE}?${params}`, {
+    headers: { "User-Agent": "MyCarPortal/1.0" },
+    next: { revalidate: 86400 }, // סטטיסטיקות ארציות — מספיק עדכון יומי
+  });
+
+  if (!res.ok) throw new Error(`data.gov.il error: ${res.status}`);
+
+  const json: DataGovResponse = await res.json();
+  if (!json.success) throw new Error("data.gov.il returned success:false");
+
+  return json.result.total;
+}
+
+/** שליפה ממוינת (sort של CKAN) — למשל הדגמים עם הכי הרבה רכבים פעילים. */
+export async function queryDataGovSorted(
+  resourceId: string,
+  sort: string,
+  limit: number,
+  fields?: string
+): Promise<DataGovRecord[]> {
+  const params = new URLSearchParams({
+    resource_id: resourceId,
+    sort,
+    limit: String(limit),
+  });
+  if (fields) params.set("fields", fields);
+
+  const res = await fetch(`${DATA_GOV_BASE}?${params}`, {
+    headers: { "User-Agent": "MyCarPortal/1.0" },
+    next: { revalidate: 86400 },
   });
 
   if (!res.ok) throw new Error(`data.gov.il error: ${res.status}`);
@@ -85,16 +142,36 @@ export interface OwnershipRecord {
 
 export interface RecallRecord {
   MISPAR_RECHEV: number;
+  RECALL_ID: number;
+  SUG_RECALL: string;
   TEUR_TAKALA: string;
   SUG_TAKALA: string;
   TAARICH_PTICHA: string;
 }
 
+// הודעות ריקול לפי דגם (resource 2c33523f) — מצליבים לפי RECALL_ID
+export interface RecallNoticeRecord {
+  RECALL_ID: number;
+  OFEN_TIKUN: string;   // "החלפה" / "תיקון" וכו'
+  YEVUAN_TEUR: string;  // שם היבואן המטפל
+  TELEPHONE: string;
+  WEBSITE: string;
+}
+
+// שמות שדות אמיתיים מהמאגר — עם רווחים! (לא SUG_TAG/TAR_HATCHALA כפי שתועד בעבר)
 export interface DisabilityRecord {
   "MISPAR RECHEV": number;
-  SUG_TAG: string;
-  TAR_HATCHALA: string;
-  TAR_SIYUM: string;
+  "TAARICH HAFAKAT TAG": number; // YYYYMMDD
+  "SUG TAV": number;
+}
+
+// רכבים ציבוריים — מוניות, אוטובוסים (resource cf29862d)
+export interface PublicVehicleRecord {
+  mispar_rechev: number;
+  sug_rechev_nm: string;   // "מונית" / "אוטובוס צבורי עירוני" וכו'
+  mispar_mekomot: number;
+  bitul_nm: string;        // "לא מבוטל" / "מבוטל"
+  tokef_dt: string;
 }
 
 // שמות השדות האמיתיים מ-data.gov.il (resource 142afde2 — 90 שדות)

@@ -4,11 +4,11 @@ import { Star } from "lucide-react";
 import { SiteShell } from "@/components/layout/site-shell";
 import { Button } from "@/components/ui/button";
 import { FavoritesGrid } from "@/components/domain/favorites-grid";
-import { createClient } from "@/lib/supabase/server";
+import { createClient, getUser } from "@/lib/supabase/server";
 
 export default async function FavoritesPage() {
   const supabase = await createClient();
-  const { data: { user } } = await supabase.auth.getUser();
+  const user = await getUser();
   if (!user) return <AuthRequired feature="המועדפים שלך" />;
 
   const [favRes, profileRes] = await Promise.all([

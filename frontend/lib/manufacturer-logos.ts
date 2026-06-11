@@ -28,6 +28,7 @@ const LOGO_MAP: Record<string, string> = {
   "פיאט": "fiat",
   "אלפא רומיאו": "alfa-romeo",
   "וולוו": "volvo",
+  "וולבו": "volvo", // האיות בפועל ב-data.gov.il ("וולבו שוודיה")
   "סאאב": "saab",
   "סוזוקי": "suzuki",
   "דייהטסו": "daihatsu",
@@ -73,11 +74,28 @@ const LOGO_MAP: Record<string, string> = {
   "tesla": "tesla",
 };
 
-// מפתחות עבריים, ממוינים מהארוך לקצר — כדי שהתאמת-הכלה תעדיף שם ספציפי
+// מפתחות עבריים, ממוינים מהארוך לקצר — כדי שההתאמה תעדיף שם ספציפי
 // (למשל "מרצדס בנץ" לפני "מרצדס") ולא תיתפס על מילה חלקית.
 const HEBREW_KEYS = Object.keys(LOGO_MAP)
   .filter((k) => /[֐-׿]/.test(k))
   .sort((a, b) => b.length - a.length);
+
+/**
+ * התאמת שם יצרן עברי מתוך מחרוזת tozeret_nm לפי תחילת-מילה.
+ * חשוב: לא התאמת-הכלה (includes) — "רנו טורקיה" מכיל את "קיה" בסוף המילה
+ * "טורקיה" וגרם ללוגו KIA על רנו. מפצלים למילים (רווח/מקף) ודורשים שהמילה
+ * תתחיל במפתח; מפתח רב-מילי ("מרצדס בנץ") נבדק בהכלה רגילה.
+ */
+export function matchHebrewName(name: string, keys: string[]): string | undefined {
+  const words = name.split(/[\s\-–—]+/).filter(Boolean);
+  for (const key of keys) {
+    const found = key.includes(" ")
+      ? name.includes(key)
+      : words.some((w) => w.startsWith(key));
+    if (found) return key;
+  }
+  return undefined;
+}
 
 export function getManufacturerSlug(name: string): string {
   if (!name) return "";
@@ -88,11 +106,10 @@ export function getManufacturerSlug(name: string): string {
   if (LOGO_MAP[trimmed]) return LOGO_MAP[trimmed];
   if (LOGO_MAP[lower]) return LOGO_MAP[lower];
 
-  // 2) התאמה לפי הכלה — שמות אמיתיים ב-data.gov.il כוללים סיומות מדינה
-  //    ("הונדה-ארה\"ב", "מרוטי-סוזוקי") שלא יתאימו בהתאמה מדויקת
-  for (const key of HEBREW_KEYS) {
-    if (trimmed.includes(key)) return LOGO_MAP[key];
-  }
+  // 2) התאמה לפי תחילת-מילה — שמות אמיתיים ב-data.gov.il כוללים סיומות מדינה
+  //    ("הונדה-ארה\"ב", "מרוטי-סוזוקי", "רנו טורקיה")
+  const key = matchHebrewName(trimmed, HEBREW_KEYS);
+  if (key) return LOGO_MAP[key];
 
   // 3) fallback — ניקוי בסיסי (בד"כ ייכשל ב-CDN ואז ה-UI יציג placeholder)
   return lower.replace(/\s+/g, "-");

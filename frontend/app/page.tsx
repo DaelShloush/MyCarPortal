@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { Suspense } from "react";
 import {
   Wallet,
   Search as SearchIcon,
@@ -11,6 +12,7 @@ import {
 } from "lucide-react";
 import { SiteShell } from "@/components/layout/site-shell";
 import { SearchInput } from "@/components/domain/search-input";
+import { IsraelStatsSection, StatsStripFallback } from "@/components/domain/israel-stats";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 
@@ -119,25 +121,10 @@ export default function LandingPage() {
         </div>
       </section>
 
-      {/* ===== STATS ===== */}
-      <section className="border-y border-[var(--color-border)] bg-[var(--color-bg-subtle)]">
-        <div className="mx-auto max-w-[1200px] px-4 md:px-6 py-6 grid grid-cols-3 gap-4">
-          {[
-            { num: "4.1M", label: "רכבים פעילים" },
-            { num: "14", label: "מאגרי מידע" },
-            { num: "30 שנה", label: "היסטוריה" },
-          ].map((s) => (
-            <div key={s.label} className="text-center">
-              <div className="text-2xl md:text-3xl font-black text-[var(--color-primary-700)]">
-                {s.num}
-              </div>
-              <div className="text-xs md:text-sm text-[var(--color-text-subtle)] mt-1">
-                {s.label}
-              </div>
-            </div>
-          ))}
-        </div>
-      </section>
+      {/* ===== STATS — נתונים חיים על צי הרכב בישראל ===== */}
+      <Suspense fallback={<StatsStripFallback />}>
+        <IsraelStatsSection />
+      </Suspense>
 
       {/* ===== FEATURES ===== */}
       <section className="mx-auto max-w-[1200px] px-4 md:px-6 py-12 md:py-16">

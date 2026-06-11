@@ -5,13 +5,13 @@ import { SiteShell } from "@/components/layout/site-shell";
 import { Button } from "@/components/ui/button";
 import { VehicleCard } from "@/components/domain/vehicle-card";
 import { AlertBanner } from "@/components/domain/alert-banner";
-import { createClient } from "@/lib/supabase/server";
+import { createClient, getUser } from "@/lib/supabase/server";
 import { getManufacturerSlug } from "@/lib/manufacturer-logos";
 import { upgradeToPremiumAction } from "@/app/actions/profile";
 
 export default async function DashboardPage() {
   const supabase = await createClient();
-  const { data: { user } } = await supabase.auth.getUser();
+  const user = await getUser();
   if (!user) return <AuthRequired feature="הרכבים שלך" />;
 
   const [vehiclesRes, remindersRes, profileRes] = await Promise.all([
@@ -147,7 +147,8 @@ export default async function DashboardPage() {
                       collisionWarning: false, pedestrianDetect: false, reverseCamera: false,
                       emergencyBrake: false, blindSpot: false, autoLights: false, safetyScore: 0 },
                     greenScore: 0, pollutionGroup: 0, co2: 0, nox: 0,
-                    tireFront: "", tireRear: "", loadFront: 0, speedRating: "",
+                    tireFront: "", tireRear: "", loadFront: 0, loadRear: 0,
+                    speedRating: "", speedRatingRear: "",
                     hasDisabilityTag: false,
                   } as Parameters<typeof VehicleCard>[0]["vehicle"]}
                 />

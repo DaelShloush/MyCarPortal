@@ -19,6 +19,22 @@ describe("getManufacturerSlug", () => {
     expect(getManufacturerSlug("מרצדס בנץ גרמנ")).toBe("mercedes-benz");
   });
 
+  it("does NOT match a brand inside a country word (טורקיה ≠ קיה)", () => {
+    // באג אמיתי: "רנו טורקיה" קיבלה לוגו KIA כי "טורקיה" מסתיימת ב"קיה"
+    expect(getManufacturerSlug("רנו טורקיה")).toBe("renault");
+    expect(getManufacturerSlug("פיאט טורקיה")).toBe("fiat");
+    expect(getManufacturerSlug("פולקסווגן סלובקיה")).toBe("volkswagen");
+  });
+
+  it("still matches kia itself", () => {
+    expect(getManufacturerSlug("קיה קוריאה")).toBe("kia");
+    expect(getManufacturerSlug("קיה")).toBe("kia");
+  });
+
+  it("matches the actual data.gov.il spelling of volvo", () => {
+    expect(getManufacturerSlug("וולבו שוודיה")).toBe("volvo");
+  });
+
   it("falls back to lowercased English input", () => {
     expect(getManufacturerSlug("Toyota")).toBe("toyota");
   });

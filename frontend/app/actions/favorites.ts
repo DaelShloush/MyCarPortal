@@ -1,7 +1,7 @@
 "use server";
 
 import { revalidatePath } from "next/cache";
-import { createClient } from "@/lib/supabase/server";
+import { createClient, getUser } from "@/lib/supabase/server";
 
 interface VehicleSummary {
   manufacturer: string;
@@ -18,9 +18,7 @@ export async function toggleFavoriteAction(
   summary: VehicleSummary
 ): Promise<ActionResult> {
   const supabase = await createClient();
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
+  const user = await getUser();
 
   if (!user) {
     return { ok: false, message: "יש להתחבר כדי לשמור למועדפים", needAuth: true };
@@ -77,9 +75,7 @@ export async function toggleFavoriteAction(
 
 export async function isFavoriteAction(plate: string): Promise<boolean> {
   const supabase = await createClient();
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
+  const user = await getUser();
   if (!user) return false;
 
   const { data } = await supabase

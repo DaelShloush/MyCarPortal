@@ -12,7 +12,9 @@ export interface Recall {
   id: string;
   description: string;
   openedAt: string;       // "2024"
-  fix?: string;
+  fix?: string;           // אופן תיקון (OFEN_TIKUN)
+  importer?: string;      // היבואן המטפל (YEVUAN_TEUR)
+  phone?: string;         // טלפון היבואן
   open: boolean;
 }
 
@@ -34,6 +36,7 @@ export interface SafetyFeatures {
   tirePressure?: boolean;          // חיישני לחץ אוויר בצמיגים
   seatbeltReminder?: boolean;      // חיישני חגורות
   reverseAeb?: boolean;            // בלימת חירום ברוורס
+  autoLightsForward?: boolean;     // תאורה אוטומטית בנסיעה קדימה
   equipLevel?: number;             // רמת אבזור בטיחותי 0–8
 }
 
@@ -91,13 +94,23 @@ export interface Vehicle {
   licenseFeeGroup?: number;    // kvuzat_agra_cd
   towingNoBrakes?: number;     // ק"ג ללא בלמים
   originalPrice?: number;      // מחיר מחירון מקורי — חדש מהיבואן בשנת הייצור (₪)
+  // comfort equipment (מהמפרט)
+  hasAC?: boolean;             // mazgan_ind
+  powerSteering?: boolean;     // hege_koah_ind
+  electricWindows?: number;    // mispar_halonot_hashmal
   // tires
   tireFront: string;
   tireRear: string;
   loadFront: number;
+  loadRear: number;
   speedRating: string;
+  speedRatingRear: string;
   // disability tag
   hasDisabilityTag: boolean;
+  disabilityTagDate?: string;  // תאריך הנפקת תג (MM/YYYY)
+  // public vehicle history (מונית / אוטובוס)
+  isPublicVehicle?: boolean;
+  publicVehicleType?: string;  // "מונית" וכו'
   // identifiers / status
   chassis?: string;            // misgeret — מספר שלדה (VIN)
   isPersonalImport?: boolean;  // יבוא אישי

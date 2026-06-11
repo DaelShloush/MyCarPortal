@@ -29,14 +29,28 @@ export function RecallsList({ recalls }: RecallsListProps) {
             size={20}
             className="text-[var(--color-risk-high-text)] shrink-0 mt-0.5"
           />
-          <div className="text-sm">
+          <div className="text-sm flex-1">
             <p className="font-bold text-[var(--color-risk-high-text)]">
               {r.description}
             </p>
             <p className="text-xs text-[var(--color-risk-high-text)] opacity-80 mt-0.5">
               נפתח: {r.openedAt}
-              {r.fix && ` · תיקון: ${r.fix}`}
+              {r.fix && ` · אופן תיקון: ${r.fix}`}
             </p>
+            {(r.importer || r.phone) && (
+              <p className="text-xs text-[var(--color-risk-high-text)] mt-1.5 pt-1.5 border-t border-[var(--color-risk-high-border)]">
+                לתיאום תיקון (ללא עלות):{" "}
+                {r.importer && <strong>{r.importer}</strong>}
+                {r.phone && (
+                  <>
+                    {r.importer && " · "}
+                    <a href={`tel:${r.phone.replace(/[^\d+]/g, "")}`} className="underline font-bold" dir="ltr">
+                      {r.phone}
+                    </a>
+                  </>
+                )}
+              </p>
+            )}
           </div>
         </li>
       ))}
