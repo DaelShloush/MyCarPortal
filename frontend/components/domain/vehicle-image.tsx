@@ -10,8 +10,8 @@ interface VehicleImageProps {
   model: string;
   year?: number | null;
   color?: string | null;
-  /** תמונה מועדפת (ויקיפדיה — אמיתית וללא watermark); אם תיכשל ניפול ל-imagin */
-  srcOverride?: string | null;
+  /** צילום אמיתי מ-Wikimedia — משמש כ-fallback כשאין render של imagin */
+  fallbackSrc?: string | null;
   /** hero = עמוד החיפוש (גדול), card = כרטיס בדשבורד/מועדפים (קטן) */
   variant?: "hero" | "card";
   className?: string;
@@ -19,8 +19,10 @@ interface VehicleImageProps {
 
 /**
  * תמונת רכב מייצגת לפי דגם. שרשרת מקורות:
- * 1) srcOverride — צילום אמיתי מ-Wikimedia (נפתר בצד השרת, cache שבועי)
- * 2) imagin.studio — CGI render לפי יצרן/דגם/שנה/צבע (דמו עם watermark)
+ * 1) imagin.studio — CGI לפי יצרן/דגם/שנה/צבע: צבע נכון, מראה אולפן אחיד
+ *    (בדמו יש watermark; מפתח בתשלום ב-NEXT_PUBLIC_IMAGIN_CUSTOMER מסיר אותו)
+ * 2) Wikimedia — צילום אמיתי של הדגם, רק אם ל-imagin אין render
+ *    (צבע וזווית לא מותאמים — לכן fallback בלבד)
  * 3) placeholder עם אייקון
  * אין צילום של הרכב הספציפי במאגרים הציבוריים — זו תמונה מייצגת של הדגם.
  */
@@ -29,13 +31,13 @@ export function VehicleImage({
   model,
   year,
   color,
-  srcOverride,
+  fallbackSrc,
   variant = "hero",
   className,
 }: VehicleImageProps) {
   const imgRef = useRef<HTMLImageElement>(null);
-  const [overrideFailed, setOverrideFailed] = useState(false);
-  const [failed, setFailed] = useState(false);
+  const [imaginFailed, setImaginFailed] = useState(false);
+  const [wikiFailed, setWikiFailed] = useState(false);
   const [loaded, setLoaded] = useState(false);
 
   const imaginUrl = buildCarImageUrl({
@@ -46,17 +48,15 @@ export function VehicleImage({
     width: variant === "hero" ? 800 : 400,
   });
 
-  const usingWiki = !!srcOverride && !overrideFailed;
-  const url = usingWiki ? srcOverride : imaginUrl;
+  // שרשרת המקורות: imagin → ויקיפדיה → placeholder
+  const usingImagin = !!imaginUrl && !imaginFailed;
+  const usingWiki = !usingImagin && !!fallbackSrc && !wikiFailed;
+  const url = usingImagin ? imaginUrl : usingWiki ? fallbackSrc : null;
 
   function advanceFallback() {
-    // שרשרת fallback: ויקיפדיה נכשלה → imagin → placeholder
-    if (usingWiki) {
-      setOverrideFailed(true);
-      setLoaded(false);
-    } else {
-      setFailed(true);
-    }
+    setLoaded(false);
+    if (usingImagin) setImaginFailed(true);
+    else if (usingWiki) setWikiFailed(true);
   }
 
   // התמונה מרונדרת ב-SSR — אם הטעינה נכשלה (למשל חסימת CSP) לפני שה-React
@@ -75,7 +75,6 @@ export function VehicleImage({
   const heightClass =
     variant === "hero" ? "h-48 md:h-64" : "h-28";
   const iconSize = variant === "hero" ? 96 : 48;
-  const showImage = url && !failed;
 
   return (
     <div
@@ -87,7 +86,7 @@ export function VehicleImage({
       role="img"
       aria-label={`${manufacturer} ${model}${year ? ` ${year}` : ""}`}
     >
-      {showImage ? (
+      {url ? (
         <>
           {/* אייקון רקע עד שהתמונה נטענת */}
           {!loaded && (
@@ -109,9 +108,8 @@ export function VehicleImage({
             onLoad={() => setLoaded(true)}
             onError={advanceFallback}
             className={cn(
-              "absolute inset-0 w-full h-full transition-opacity duration-300",
-              // צילום אמיתי ממלא את המסגרת; CGI שקוף נשאר contain
-              usingWiki ? "object-cover" : "object-contain",
+              // contain תמיד — אף תמונה לא נחתכת, צילום אמיתי מקבל letterbox עדין
+              "absolute inset-0 w-full h-full object-contain transition-opacity duration-300",
               loaded ? "opacity-100" : "opacity-0"
             )}
           />

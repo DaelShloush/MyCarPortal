@@ -176,7 +176,7 @@ export default async function VehicleDetailPage({ params }: VehicleDetailProps) 
             <VehicleImage
               manufacturer={vehicle.manufacturer ?? ""}
               model={vehicle.model ?? ""}
-              srcOverride={wikiImage}
+              fallbackSrc={wikiImage}
             />
             <div className="absolute bottom-3 start-3">
               <ManufacturerLogo

@@ -330,7 +330,7 @@ export default async function SearchPage({ params }: SearchPageProps) {
               model={vehicle.model}
               year={vehicle.year}
               color={vehicle.color}
-              srcOverride={wikiImage}
+              fallbackSrc={wikiImage}
             />
             <div className="absolute bottom-3 start-3">
               <ManufacturerLogo
