@@ -422,9 +422,6 @@ export default async function SearchPage({ params }: SearchPageProps) {
         {/* ===== ניווט מהיר בין סקשנים (נייד בלבד) ===== */}
         <SectionNav hide={hasValueGroup ? [] : ["#value"]} />
 
-        {/* ===== השוואה לרכב אחר ===== */}
-        <CompareInput currentPlate={vehicle.plate} />
-
         {/* ╔══ קבוצה א׳: היסטוריה ובדיקות — הנתונים הקריטיים לקנייה ══╗ */}
         <GroupHeading emoji="🔍" title="היסטוריה ובדיקות" />
 
@@ -967,6 +964,9 @@ export default async function SearchPage({ params }: SearchPageProps) {
         >
           <VehicleScoreCard result={scoreResult} />
         </Section>
+
+        {/* ===== השוואה לרכב אחר — אחרי שראו את הציון, מזמין לבדוק מועמד נוסף ===== */}
+        <CompareInput currentPlate={vehicle.plate} />
 
         {/* ===== קישורים שימושיים ===== */}
         <Section title="קישורים שימושיים" icon={<ExternalLink size={16} />}>
