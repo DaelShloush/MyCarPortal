@@ -7,7 +7,8 @@ const csp = [
   "default-src 'self'",
   "script-src 'self' 'unsafe-inline' 'unsafe-eval' https://va.vercel-scripts.com",
   "style-src 'self' 'unsafe-inline'",
-  "img-src 'self' data: blob: https://cdn.imagin.studio https://vl.imgix.net https://*.supabase.co",
+  // upload.wikimedia.org — תמונות דגם אמיתיות מוויקיפדיה (car-image-wiki.ts)
+  "img-src 'self' data: blob: https://cdn.imagin.studio https://vl.imgix.net https://*.supabase.co https://upload.wikimedia.org",
   "font-src 'self' data:",
   "connect-src 'self' https://data.gov.il https://*.supabase.co wss://*.supabase.co https://va.vercel-scripts.com https://vitals.vercel-insights.com",
   "frame-ancestors 'self'",

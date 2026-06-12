@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { Car } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { buildCarImageUrl } from "@/lib/car-image";
@@ -33,6 +33,7 @@ export function VehicleImage({
   variant = "hero",
   className,
 }: VehicleImageProps) {
+  const imgRef = useRef<HTMLImageElement>(null);
   const [overrideFailed, setOverrideFailed] = useState(false);
   const [failed, setFailed] = useState(false);
   const [loaded, setLoaded] = useState(false);
@@ -47,6 +48,29 @@ export function VehicleImage({
 
   const usingWiki = !!srcOverride && !overrideFailed;
   const url = usingWiki ? srcOverride : imaginUrl;
+
+  function advanceFallback() {
+    // שרשרת fallback: ויקיפדיה נכשלה → imagin → placeholder
+    if (usingWiki) {
+      setOverrideFailed(true);
+      setLoaded(false);
+    } else {
+      setFailed(true);
+    }
+  }
+
+  // התמונה מרונדרת ב-SSR — אם הטעינה נכשלה (למשל חסימת CSP) לפני שה-React
+  // התחבר לדף, אירוע onError כבר לא יגיע. בדיקה אחת אחרי mount סוגרת את החור.
+  useEffect(() => {
+    const el = imgRef.current;
+    if (!el) return;
+    if (el.complete && el.naturalWidth === 0) {
+      advanceFallback();
+    } else if (el.complete && el.naturalWidth > 0) {
+      setLoaded(true);
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [url]);
 
   const heightClass =
     variant === "hero" ? "h-48 md:h-64" : "h-28";
@@ -75,6 +99,7 @@ export function VehicleImage({
           )}
           {/* eslint-disable-next-line @next/next/no-img-element */}
           <img
+            ref={imgRef}
             key={url}
             src={url}
             alt={`${manufacturer} ${model}${year ? ` ${year}` : ""}`}
@@ -82,15 +107,7 @@ export function VehicleImage({
             fetchPriority={variant === "hero" ? "high" : "auto"}
             decoding="async"
             onLoad={() => setLoaded(true)}
-            onError={() => {
-              // שרשרת fallback: ויקיפדיה נכשלה → imagin → placeholder
-              if (usingWiki) {
-                setOverrideFailed(true);
-                setLoaded(false);
-              } else {
-                setFailed(true);
-              }
-            }}
+            onError={advanceFallback}
             className={cn(
               "absolute inset-0 w-full h-full transition-opacity duration-300",
               // צילום אמיתי ממלא את המסגרת; CGI שקוף נשאר contain
