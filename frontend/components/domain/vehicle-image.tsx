@@ -10,34 +10,43 @@ interface VehicleImageProps {
   model: string;
   year?: number | null;
   color?: string | null;
+  /** תמונה מועדפת (ויקיפדיה — אמיתית וללא watermark); אם תיכשל ניפול ל-imagin */
+  srcOverride?: string | null;
   /** hero = עמוד החיפוש (גדול), card = כרטיס בדשבורד/מועדפים (קטן) */
   variant?: "hero" | "card";
   className?: string;
 }
 
 /**
- * תמונת רכב — render מייצג לפי דגם מ-imagin.studio.
- * אין צילום של הרכב הספציפי במאגרים הציבוריים; זו תמונה לפי יצרן/דגם/שנה/צבע.
- * אם אין נתונים מספיקים או הטעינה נכשלת — נופל ל-placeholder עם אייקון.
+ * תמונת רכב מייצגת לפי דגם. שרשרת מקורות:
+ * 1) srcOverride — צילום אמיתי מ-Wikimedia (נפתר בצד השרת, cache שבועי)
+ * 2) imagin.studio — CGI render לפי יצרן/דגם/שנה/צבע (דמו עם watermark)
+ * 3) placeholder עם אייקון
+ * אין צילום של הרכב הספציפי במאגרים הציבוריים — זו תמונה מייצגת של הדגם.
  */
 export function VehicleImage({
   manufacturer,
   model,
   year,
   color,
+  srcOverride,
   variant = "hero",
   className,
 }: VehicleImageProps) {
+  const [overrideFailed, setOverrideFailed] = useState(false);
   const [failed, setFailed] = useState(false);
   const [loaded, setLoaded] = useState(false);
 
-  const url = buildCarImageUrl({
+  const imaginUrl = buildCarImageUrl({
     manufacturer,
     model,
     year,
     color,
     width: variant === "hero" ? 800 : 400,
   });
+
+  const usingWiki = !!srcOverride && !overrideFailed;
+  const url = usingWiki ? srcOverride : imaginUrl;
 
   const heightClass =
     variant === "hero" ? "h-48 md:h-64" : "h-28";
@@ -66,15 +75,26 @@ export function VehicleImage({
           )}
           {/* eslint-disable-next-line @next/next/no-img-element */}
           <img
+            key={url}
             src={url}
             alt={`${manufacturer} ${model}${year ? ` ${year}` : ""}`}
             loading={variant === "hero" ? "eager" : "lazy"}
             fetchPriority={variant === "hero" ? "high" : "auto"}
             decoding="async"
             onLoad={() => setLoaded(true)}
-            onError={() => setFailed(true)}
+            onError={() => {
+              // שרשרת fallback: ויקיפדיה נכשלה → imagin → placeholder
+              if (usingWiki) {
+                setOverrideFailed(true);
+                setLoaded(false);
+              } else {
+                setFailed(true);
+              }
+            }}
             className={cn(
-              "absolute inset-0 w-full h-full object-contain transition-opacity duration-300",
+              "absolute inset-0 w-full h-full transition-opacity duration-300",
+              // צילום אמיתי ממלא את המסגרת; CGI שקוף נשאר contain
+              usingWiki ? "object-cover" : "object-contain",
               loaded ? "opacity-100" : "opacity-0"
             )}
           />
@@ -90,6 +110,9 @@ export function VehicleImage({
       {variant === "hero" && (
         <span className="absolute bottom-3 end-3 text-xs px-2 py-1 rounded-md bg-white/80 backdrop-blur text-[var(--color-gray-600)] font-medium z-10">
           {manufacturer} {model}
+          {usingWiki && loaded && (
+            <span className="text-[9px] opacity-70"> · Wikimedia</span>
+          )}
         </span>
       )}
     </div>

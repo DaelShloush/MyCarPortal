@@ -11,14 +11,19 @@ interface SectionProps {
 
 /**
  * Section — בלוק תוכן בעמוד תוצאות (DESIGN.md §7.4)
- * כותרת על רקע primary-700 + תוכן בכרטיס
+ * סגנון אוורירי: כותרת לבנה עם אייקון בריבוע צבעוני, במקום פס כחול כבד —
+ * נותן לעמוד מראה של כרטיסים נקיים על רקע אפרפר.
  */
 export function Section({ title, icon, children, className, id }: SectionProps) {
   return (
-    <section id={id} className={cn("scroll-mt-20 rounded-xl overflow-hidden border border-[var(--color-border)] bg-white", className)}>
-      <header className="flex items-center gap-2 bg-[var(--color-primary-700)] text-white px-4 py-3 font-bold text-sm">
-        {icon && <span className="opacity-80">{icon}</span>}
-        <span>{title}</span>
+    <section id={id} className={cn("scroll-mt-20 rounded-xl overflow-hidden border border-[var(--color-border)] bg-white shadow-[var(--shadow-sm)]", className)}>
+      <header className="flex items-center gap-2.5 px-4 py-3 border-b border-[var(--color-border)]">
+        {icon && (
+          <span className="w-8 h-8 shrink-0 rounded-lg bg-[var(--color-primary-50)] text-[var(--color-primary-700)] grid place-items-center">
+            {icon}
+          </span>
+        )}
+        <span className="font-bold text-[15px] text-[var(--color-gray-900)]">{title}</span>
       </header>
       <div className="p-4">{children}</div>
     </section>

@@ -25,10 +25,13 @@ import {
   Armchair,
   Weight,
   Caravan,
+  CheckCircle2,
+  XCircle,
 } from "lucide-react";
 import { SiteShell } from "@/components/layout/site-shell";
 import { Section, InfoRow } from "@/components/ui/section";
 import { StatTile, ScaleBar } from "@/components/ui/stat-tile";
+import { PlateBadge } from "@/components/ui/plate-badge";
 import { Badge } from "@/components/ui/badge";
 import { VehicleImage } from "@/components/domain/vehicle-image";
 import { ManufacturerLogo } from "@/components/domain/manufacturer-logo";
@@ -42,6 +45,7 @@ import { SectionNav } from "@/components/domain/section-nav";
 import { VehicleScoreCard } from "@/components/domain/vehicle-score";
 import { computeVehicleScore } from "@/lib/vehicle-score";
 import { fetchVehicleByPlate } from "@/lib/api/vehicle-aggregator";
+import { fetchWikiCarImage } from "@/lib/api/car-image-wiki";
 import { getUser } from "@/lib/supabase/server";
 import { isFavoriteAction } from "@/app/actions/favorites";
 import { estimateCurrentValue } from "@/lib/value-estimator";
@@ -214,12 +218,12 @@ export default async function SearchPage({ params }: SearchPageProps) {
   // ציון הרכב — שקלול כל דגלי האזהרה לציון 0-100 עם פירוט שקוף
   const scoreResult = computeVehicleScore(vehicle);
 
-  // בדיקת מצב מועדפים (שמירת ההיסטוריה מתבצעת ב-SearchHistoryTracker)
+  // מועדפים + תמונת דגם אמיתית מוויקיפדיה — במקביל (שתיהן קריאות רשת)
   const user = await getUser();
-  let initialIsFavorite = false;
-  if (user) {
-    initialIsFavorite = await isFavoriteAction(plate);
-  }
+  const [initialIsFavorite, wikiImage] = await Promise.all([
+    user ? isFavoriteAction(plate) : Promise.resolve(false),
+    fetchWikiCarImage(vehicle.manufacturerSlug, vehicle.model),
+  ]);
 
   // נתוני מבנה (Schema.org) — לתצוגה עשירה ב-Google
   const jsonLd = {
@@ -251,6 +255,8 @@ export default async function SearchPage({ params }: SearchPageProps) {
           searchedAt: new Date().toISOString(),
         }}
       />
+      {/* רקע אפרפר — מבליט את כרטיסי הסקשנים הלבנים */}
+      <div className="bg-[var(--color-bg-subtle)] min-h-screen print:bg-white">
       <div className="mx-auto max-w-[920px] px-4 md:px-6 py-4 md:py-8 space-y-6">
         {/* ===== כותרת להדפסה בלבד ===== */}
         <div className="print-only mb-4 pb-3" style={{ borderBottom: "2px solid #2c3e50" }}>
@@ -324,6 +330,7 @@ export default async function SearchPage({ params }: SearchPageProps) {
               model={vehicle.model}
               year={vehicle.year}
               color={vehicle.color}
+              srcOverride={wikiImage}
             />
             <div className="absolute bottom-3 start-3">
               <ManufacturerLogo
@@ -340,15 +347,15 @@ export default async function SearchPage({ params }: SearchPageProps) {
               <h1 className="text-2xl md:text-3xl font-black text-[var(--color-gray-900)] mb-1">
                 {vehicle.manufacturer} {vehicle.model} {vehicle.year}
               </h1>
-              <p className="text-sm text-[var(--color-text-subtle)] flex flex-wrap items-center gap-x-2 gap-y-1">
-                <span className="plate-text font-bold">{vehicle.plate}</span>
-                <span>·</span>
+              <p className="text-sm text-[var(--color-text-subtle)] flex flex-wrap items-center gap-x-2 gap-y-1.5">
+                <PlateBadge plate={vehicle.plate} />
                 {vehicle.yad > 0 && (
                   <>
-                    <span>יד {vehicle.yad}</span>
                     <span>·</span>
+                    <span>יד {vehicle.yad}</span>
                   </>
                 )}
+                <span>·</span>
                 <span>{vehicle.color}</span>
                 <span>·</span>
                 <span>{vehicle.fuelType}</span>
@@ -466,37 +473,47 @@ export default async function SearchPage({ params }: SearchPageProps) {
           title="רישוי, טסט וקילומטראז׳"
           icon={<ClipboardCheck size={16} />}
         >
+          {/* אריח סטטוס רישיון — הנתון החשוב בסקשן, מודגש בצבע */}
+          {vehicle.testExpiryDate && (
+            <div
+              className={`rounded-xl border p-4 flex items-center gap-3 mb-4 ${
+                testExpired
+                  ? "bg-[var(--color-risk-high-bg)] border-[var(--color-risk-high-border)]"
+                  : "bg-[var(--color-risk-good-bg)] border-[var(--color-risk-good-border)]"
+              }`}
+            >
+              {testExpired ? (
+                <XCircle size={28} className="text-[var(--color-danger)] shrink-0" />
+              ) : (
+                <CheckCircle2 size={28} className="text-[var(--color-risk-good-text)] shrink-0" />
+              )}
+              <div className="min-w-0">
+                <p
+                  className={`font-black ${
+                    testExpired
+                      ? "text-[var(--color-risk-high-text)]"
+                      : "text-[var(--color-risk-good-text)]"
+                  }`}
+                >
+                  {testExpired ? "רישיון הרכב פג תוקף" : "רישיון הרכב בתוקף"}
+                </p>
+                <p
+                  className={`text-sm ${
+                    testExpired
+                      ? "text-[var(--color-risk-high-text)]"
+                      : "text-[var(--color-risk-good-text)]"
+                  }`}
+                >
+                  {testExpired ? "פג בתאריך" : "בתוקף עד"} {vehicle.testExpiryDate}
+                  {" · "}
+                  {noPeriodicTestYet
+                    ? "מבחן רישוי טרם נדרש (רכב עד גיל 3)"
+                    : `מבחן אחרון: ${vehicle.testLastDate || "—"}`}
+                </p>
+              </div>
+            </div>
+          )}
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-x-6">
-            <InfoRow
-              label="מבחן רישוי אחרון"
-              value={
-                noPeriodicTestYet ? (
-                  <span className="text-[var(--color-text-subtle)]">
-                    טרם נדרש (רכב עד גיל 3)
-                  </span>
-                ) : (
-                  vehicle.testLastDate || "—"
-                )
-              }
-            />
-            <InfoRow
-              label="רישיון בתוקף עד"
-              value={
-                vehicle.testExpiryDate ? (
-                  testExpired ? (
-                    <span className="text-[var(--color-danger)] font-bold">
-                      {vehicle.testExpiryDate} ✗ (פג)
-                    </span>
-                  ) : (
-                    <span className="text-[var(--color-success)] font-bold">
-                      {vehicle.testExpiryDate} ✓
-                    </span>
-                  )
-                ) : (
-                  "—"
-                )
-              }
-            />
             {vehicle.kmAtLastTest > 0 && (
               <InfoRow label="ק״מ במבחן אחרון" value={vehicle.kmAtLastTest.toLocaleString()} />
             )}
@@ -1047,6 +1064,7 @@ export default async function SearchPage({ params }: SearchPageProps) {
             ← חיפוש רכב נוסף
           </Link>
         </div>
+      </div>
       </div>
     </SiteShell>
   );

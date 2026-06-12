@@ -29,6 +29,8 @@ import { RemindersManager } from "@/components/domain/reminders-manager";
 import { SaleAdGenerator } from "@/components/domain/sale-ad-generator";
 import { InsuranceEditor } from "@/components/domain/insurance-editor";
 import { createClient, getUser } from "@/lib/supabase/server";
+import { fetchWikiCarImage } from "@/lib/api/car-image-wiki";
+import { PlateBadge } from "@/components/ui/plate-badge";
 import { getManufacturerSlug } from "@/lib/manufacturer-logos";
 
 interface VehicleDetailProps {
@@ -124,6 +126,11 @@ export default async function VehicleDetailPage({ params }: VehicleDetailProps) 
   }
 
   const vehicle = vehicleRes.data;
+  // תמונת דגם אמיתית מוויקיפדיה (cache שבועי) — fallback ל-imagin בצד הלקוח
+  const wikiImage = await fetchWikiCarImage(
+    getManufacturerSlug(vehicle.manufacturer ?? ""),
+    vehicle.model ?? ""
+  );
   const serviceRecords = serviceRes.data ?? [];
   const documents = docsRes.data ?? [];
   const reminders = remindersRes.data ?? [];
@@ -169,6 +176,7 @@ export default async function VehicleDetailPage({ params }: VehicleDetailProps) 
             <VehicleImage
               manufacturer={vehicle.manufacturer ?? ""}
               model={vehicle.model ?? ""}
+              srcOverride={wikiImage}
             />
             <div className="absolute bottom-3 start-3">
               <ManufacturerLogo
@@ -197,9 +205,7 @@ export default async function VehicleDetailPage({ params }: VehicleDetailProps) 
               <p className="text-sm text-[var(--color-text-subtle)]">
                 {vehicle.manufacturer} {vehicle.model}{" "}
                 {vehicle.year && `${vehicle.year} ·`}{" "}
-                <span className="plate-text font-bold">
-                  {vehicle.license_plate}
-                </span>
+                <PlateBadge plate={vehicle.license_plate} size="sm" />
               </p>
             </div>
             {vehicle.owner_count != null && vehicle.owner_count > 0 && (
