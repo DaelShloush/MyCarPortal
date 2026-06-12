@@ -24,6 +24,7 @@ const LOGO_MAP: Record<string, string> = {
   "אופל": "opel",
   "פיג'ו": "peugeot",
   "ציטרואן": "citroen",
+  "סיטרואן": "citroen", // האיות בפועל ב-data.gov.il ("סיטרואן ספרד")
   "רנו": "renault",
   "פיאט": "fiat",
   "אלפא רומיאו": "alfa-romeo",
@@ -48,6 +49,7 @@ const LOGO_MAP: Record<string, string> = {
   "ב.י.ד": "byd",
   "BYD": "byd",
   "MG": "mg",
+  "מ.ג": "mg", // האיות בפועל ב-data.gov.il ("מ.ג סין")
   // אנגלית (fallback)
   "toyota": "toyota",
   "honda": "honda",

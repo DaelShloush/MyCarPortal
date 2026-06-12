@@ -35,6 +35,11 @@ describe("getManufacturerSlug", () => {
     expect(getManufacturerSlug("וולבו שוודיה")).toBe("volvo");
   });
 
+  it("matches actual data.gov.il spellings: סיטרואן and מ.ג", () => {
+    expect(getManufacturerSlug("סיטרואן ספרד")).toBe("citroen");
+    expect(getManufacturerSlug("מ.ג סין")).toBe("mg");
+  });
+
   it("falls back to lowercased English input", () => {
     expect(getManufacturerSlug("Toyota")).toBe("toyota");
   });
