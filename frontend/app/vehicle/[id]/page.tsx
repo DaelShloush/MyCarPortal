@@ -12,6 +12,7 @@ import {
   Tag,
   AlertTriangle,
   ShieldCheck,
+  FileSearch,
 } from "lucide-react";
 import { SiteShell } from "@/components/layout/site-shell";
 import { Card } from "@/components/ui/card";
@@ -147,10 +148,19 @@ export default async function VehicleDetailPage({ params }: VehicleDetailProps) 
               {vehicle.nickname || `${vehicle.manufacturer} ${vehicle.model}`}
             </span>
           </nav>
-          <RefreshVehicleButton
-            vehicleId={vehicle.id}
-            lastSyncedAt={vehicle.last_synced_at ?? null}
-          />
+          <div className="flex items-center gap-2">
+            <Link
+              href={`/search/${vehicle.license_plate}`}
+              className="inline-flex items-center gap-1.5 h-9 px-3 rounded-lg bg-[var(--color-primary-700)] text-white text-sm font-bold hover:bg-[var(--color-primary-800)] transition-colors"
+            >
+              <FileSearch size={15} />
+              דוח מלא
+            </Link>
+            <RefreshVehicleButton
+              vehicleId={vehicle.id}
+              lastSyncedAt={vehicle.last_synced_at ?? null}
+            />
+          </div>
         </div>
 
         {/* Header */}

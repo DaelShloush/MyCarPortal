@@ -17,9 +17,18 @@ import {
   AirVent,
   CarTaxiFront,
   Gauge,
+  Zap,
+  Fuel,
+  CalendarDays,
+  CarFront,
+  DoorOpen,
+  Armchair,
+  Weight,
+  Caravan,
 } from "lucide-react";
 import { SiteShell } from "@/components/layout/site-shell";
 import { Section, InfoRow } from "@/components/ui/section";
+import { StatTile, ScaleBar } from "@/components/ui/stat-tile";
 import { Badge } from "@/components/ui/badge";
 import { VehicleImage } from "@/components/domain/vehicle-image";
 import { ManufacturerLogo } from "@/components/domain/manufacturer-logo";
@@ -375,6 +384,32 @@ export default async function SearchPage({ params }: SearchPageProps) {
               hasOpenRecalls: vehicle.recalls.some((r) => r.open),
             }}
           />
+        </div>
+
+        {/* ===== נתוני מפתח במבט אחד ===== */}
+        <div className="grid grid-cols-3 sm:grid-cols-6 gap-2">
+          {vehicle.year > 0 && (
+            <StatTile icon={<CalendarDays size={16} />} value={vehicle.year} label="שנת ייצור" />
+          )}
+          {vehicle.yad > 0 && (
+            <StatTile icon={<Users size={16} />} value={`יד ${vehicle.yad}`} label="בעלות" />
+          )}
+          {vehicle.kmAtLastTest > 0 && (
+            <StatTile
+              icon={<Gauge size={16} />}
+              value={vehicle.kmAtLastTest.toLocaleString()}
+              label='ק"מ אחרון'
+            />
+          )}
+          {vehicle.fuelType && (
+            <StatTile icon={<Fuel size={16} />} value={vehicle.fuelType} label="דלק" />
+          )}
+          {vehicle.gearbox && (
+            <StatTile icon={<Cog size={16} />} value={vehicle.gearbox} label="תיבת הילוכים" />
+          )}
+          {vehicle.horsepower > 0 && (
+            <StatTile icon={<Zap size={16} />} value={vehicle.horsepower} label="כוח סוס" />
+          )}
         </div>
 
         {/* ===== ניווט מהיר בין סקשנים (נייד בלבד) ===== */}
@@ -738,34 +773,54 @@ export default async function SearchPage({ params }: SearchPageProps) {
           </div>
         </Section>
 
-        {/* ===== מנוע ומפרט טכני ===== */}
+        {/* ===== מנוע ומפרט טכני — אריחים ויזואליים ===== */}
         <Section title="מנוע ומפרט טכני" icon={<Cog size={16} />}>
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-x-6">
+          <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-2">
             {vehicle.engineCC > 0 && (
-              <InfoRow label="נפח מנוע" value={`${vehicle.engineCC.toLocaleString()} סמ״ק`} />
+              <StatTile
+                icon={<Gauge size={16} />}
+                value={`${vehicle.engineCC.toLocaleString()} סמ״ק`}
+                label="נפח מנוע"
+              />
             )}
             {vehicle.horsepower > 0 && (
-              <InfoRow label="כוח" value={`${vehicle.horsepower} כ״ס`} />
+              <StatTile icon={<Zap size={16} />} value={`${vehicle.horsepower} כ״ס`} label="כוח" />
             )}
             {vehicle.propulsion && (
-              <InfoRow label="טכנולוגיית הנעה" value={vehicle.propulsion} />
+              <StatTile icon={<Fuel size={16} />} value={vehicle.propulsion} label="טכנולוגיית הנעה" />
             )}
             {vehicle.gearbox && (
-              <InfoRow label="תיבת הילוכים" value={vehicle.gearbox} />
+              <StatTile icon={<Cog size={16} />} value={vehicle.gearbox} label="תיבת הילוכים" />
             )}
             {vehicle.bodyType && (
-              <InfoRow label="סוג מרכב" value={vehicle.bodyType} />
+              <StatTile icon={<CarFront size={16} />} value={vehicle.bodyType} label="סוג מרכב" />
             )}
-            {vehicle.doors > 0 && <InfoRow label="דלתות" value={vehicle.doors} />}
-            {vehicle.seats > 0 && <InfoRow label="מושבים" value={vehicle.seats} />}
+            {vehicle.doors > 0 && (
+              <StatTile icon={<DoorOpen size={16} />} value={vehicle.doors} label="דלתות" />
+            )}
+            {vehicle.seats > 0 && (
+              <StatTile icon={<Armchair size={16} />} value={vehicle.seats} label="מושבים" />
+            )}
             {vehicle.weightKg > 0 && (
-              <InfoRow label="משקל כולל" value={`${vehicle.weightKg.toLocaleString()} ק״ג`} />
+              <StatTile
+                icon={<Weight size={16} />}
+                value={`${vehicle.weightKg.toLocaleString()} ק״ג`}
+                label="משקל כולל"
+              />
             )}
             {vehicle.towingKg > 0 && (
-              <InfoRow label="כושר גרירה (עם בלמים)" value={`${vehicle.towingKg.toLocaleString()} ק״ג`} />
+              <StatTile
+                icon={<Caravan size={16} />}
+                value={`${vehicle.towingKg.toLocaleString()} ק״ג`}
+                label="גרירה (עם בלמים)"
+              />
             )}
             {vehicle.towingNoBrakes ? (
-              <InfoRow label="כושר גרירה (ללא בלמים)" value={`${vehicle.towingNoBrakes.toLocaleString()} ק״ג`} />
+              <StatTile
+                icon={<Caravan size={16} />}
+                value={`${vehicle.towingNoBrakes.toLocaleString()} ק״ג`}
+                label="גרירה (ללא בלמים)"
+              />
             ) : null}
           </div>
         </Section>
@@ -807,13 +862,29 @@ export default async function SearchPage({ params }: SearchPageProps) {
 
         {/* ===== סביבה ופליטות ===== */}
         <Section title="סביבה ופליטות" icon={<Leaf size={16} />}>
+          {(vehicle.greenScore > 0 || vehicle.pollutionGroup > 0) && (
+            <div className="space-y-4 mb-4 pb-4 border-b border-[var(--color-border)]">
+              {vehicle.pollutionGroup > 0 && (
+                <ScaleBar
+                  label="קבוצת זיהום"
+                  value={vehicle.pollutionGroup}
+                  max={15}
+                  lowIsGood
+                  hint="1 = הכי נקי · 15 = הכי מזהם. משפיע על אגרת הרישוי."
+                />
+              )}
+              {vehicle.greenScore > 0 && (
+                <ScaleBar
+                  label="מדד ירוק"
+                  value={vehicle.greenScore}
+                  max={15}
+                  lowIsGood
+                  hint="ציון סביבתי לפי פליטות — נמוך = ירוק יותר."
+                />
+              )}
+            </div>
+          )}
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-x-6">
-            {vehicle.greenScore > 0 && (
-              <InfoRow label="מדד ירוק" value={`${vehicle.greenScore} / 15`} />
-            )}
-            {vehicle.pollutionGroup > 0 && (
-              <InfoRow label="קבוצת זיהום" value={`${vehicle.pollutionGroup} / 15`} />
-            )}
             {vehicle.emissionStandard && (
               <InfoRow label="תקן זיהום" value={vehicle.emissionStandard} />
             )}
@@ -838,31 +909,35 @@ export default async function SearchPage({ params }: SearchPageProps) {
           </div>
         </Section>
 
-        {/* ===== צמיגים ===== */}
+        {/* ===== צמיגים — כרטיס לכל סרן ===== */}
         <Section title="צמיגים" icon={<Disc3 size={16} />}>
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-x-6">
-            <InfoRow label="צמיג קדמי" value={vehicle.tireFront} />
-            <InfoRow label="צמיג אחורי" value={vehicle.tireRear} />
-            {vehicle.loadFront > 0 && (
-              <InfoRow
-                label="קוד עומס (קדמי / אחורי)"
-                value={
-                  vehicle.loadRear > 0 && vehicle.loadRear !== vehicle.loadFront
-                    ? `${vehicle.loadFront} / ${vehicle.loadRear}`
-                    : vehicle.loadFront
-                }
-              />
-            )}
-            {vehicle.speedRating && (
-              <InfoRow
-                label="דירוג מהירות (קדמי / אחורי)"
-                value={
-                  vehicle.speedRatingRear && vehicle.speedRatingRear !== vehicle.speedRating
-                    ? `${vehicle.speedRating} / ${vehicle.speedRatingRear}`
-                    : vehicle.speedRating
-                }
-              />
-            )}
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+            {[
+              { title: "סרן קדמי", size: vehicle.tireFront, load: vehicle.loadFront, speed: vehicle.speedRating },
+              { title: "סרן אחורי", size: vehicle.tireRear, load: vehicle.loadRear, speed: vehicle.speedRatingRear },
+            ].map((axle) => (
+              <div
+                key={axle.title}
+                className="rounded-xl border border-[var(--color-border)] p-4 flex items-center gap-3"
+              >
+                <span className="w-10 h-10 shrink-0 rounded-lg bg-[var(--color-primary-50)] text-[var(--color-primary-600)] grid place-items-center">
+                  <Disc3 size={20} />
+                </span>
+                <div className="min-w-0">
+                  <p className="text-xs text-[var(--color-text-subtle)]">{axle.title}</p>
+                  <p className="plate-text font-black text-[var(--color-gray-900)]" dir="ltr">
+                    {axle.size || "—"}
+                  </p>
+                  {(axle.load > 0 || axle.speed) && (
+                    <p className="text-[11px] text-[var(--color-text-subtle)] mt-0.5">
+                      {axle.load > 0 && <>קוד עומס {axle.load}</>}
+                      {axle.load > 0 && axle.speed && " · "}
+                      {axle.speed && <>מהירות {axle.speed}</>}
+                    </p>
+                  )}
+                </div>
+              </div>
+            ))}
           </div>
         </Section>
 
