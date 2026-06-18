@@ -1,0 +1,108 @@
+erDiagram
+    auth_users ||--|| profiles : "has"
+    auth_users ||--o{ vehicles : "owns"
+    auth_users ||--o{ service_records : "logs"
+    auth_users ||--o{ reminders : "sets"
+    auth_users ||--o{ favorites : "saves"
+    auth_users ||--o{ search_history : "performs"
+    auth_users ||--o{ push_subscriptions : "registers"
+    vehicles ||--o{ service_records : "has"
+    vehicles ||--o{ documents : "has"
+    vehicles ||--o{ reminders : "has"
+
+    auth_users {
+        uuid id PK
+        text email
+    }
+    profiles {
+        uuid id PK,FK
+        text name
+        text plan
+        boolean push_enabled
+        timestamptz created_at
+    }
+    vehicles {
+        uuid id PK
+        uuid user_id FK
+        text license_plate
+        text nickname
+        text manufacturer
+        text model
+        integer year
+        text color
+        text fuel_type
+        text ownership_type
+        date last_test_date
+        date test_expiry_date
+        date insurance_expiry_date
+        integer km_at_last_test
+        boolean structural_change
+        boolean color_changed
+        date first_registration_date
+        integer owner_count
+        boolean has_open_recalls
+        jsonb raw_gov_data
+        integer asking_price
+        boolean is_for_sale
+        text sale_notes
+        text sale_photo_path
+        timestamptz last_synced_at
+        timestamptz added_at
+    }
+    service_records {
+        uuid id PK
+        uuid vehicle_id FK
+        uuid user_id FK
+        text service_type
+        text title
+        text description
+        text garage_name
+        integer cost
+        integer km_at_service
+        date service_date
+        text receipt_path
+        timestamptz created_at
+    }
+    documents {
+        uuid id PK
+        uuid vehicle_id FK
+        text type
+        text name
+        text file_path
+        integer file_size
+        timestamptz uploaded_at
+    }
+    reminders {
+        uuid id PK
+        uuid user_id FK
+        uuid vehicle_id FK
+        text type
+        text title
+        date due_date
+        integer notify_days_before
+        boolean notified_email
+        boolean notified_push
+        timestamptz created_at
+    }
+    favorites {
+        uuid id PK
+        uuid user_id FK
+        text license_plate
+        jsonb cached_data
+        text notes
+        timestamptz added_at
+    }
+    search_history {
+        uuid id PK
+        uuid user_id FK
+        text license_plate
+        jsonb result_summary
+        timestamptz searched_at
+    }
+    push_subscriptions {
+        uuid id PK
+        uuid user_id FK
+        text endpoint
+        jsonb keys
+        timestamptz created_at
+    }
