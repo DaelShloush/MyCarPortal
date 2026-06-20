@@ -161,7 +161,7 @@ Vercel CDN / Edge
 
 ## מקורות הנתונים — data.gov.il
 
-כל הקריאות ל-`https://data.gov.il/api/3/action/datastore_search`. בכל חיפוש מתבצעות 7 קריאות מקבילות + 3 תלויות (לפי קודי יצרן/דגם):
+כל הקריאות ל-`https://data.gov.il/api/3/action/datastore_search`. בכל חיפוש מתבצעות 8 קריאות מקבילות + 4 תלויות (לפי קודי יצרן/דגם):
 
 | מטרה | Resource ID |
 | --- | --- |
@@ -194,6 +194,7 @@ Vercel CDN / Edge
 | **Supabase Storage** | אחסון קבצים | שמירת מסמכי רכב ותמונות מודעות מכירה, עם policies לפי תיקיית המשתמש |
 | **data.gov.il (CKAN API)** | API חיצוני | שליפת נתוני הרכב הרשמיים מ-12 מאגרים ממשלתיים (חינמי, ללא מפתח) — נקרא דרך השרת, לא מהקליינט |
 | **imagin.studio (CGI API)** | API חיצוני | render תמונת רכב דינמית לפי יצרן/דגם/שנה/צבע |
+| **Wikipedia / Wikimedia** | API חיצוני | צילום דגם אמיתי כ-fallback כשאין render ב-imagin |
 | **avto-dev vehicle-logotypes** | API / CDN | לוגו יצרן אמיתי (vl.imgix.net) |
 | **Resend** | שירות מייל (API) | שליחת התראות תזכורת (טסט/ביטוח) במייל למשתמש |
 | **Vercel Cron** | תזמון (לוגיקת שרת) | הרצה יומית של `/api/reminders/check` — מאתר תזכורות בשלות ומפעיל את שליחת המייל |
@@ -294,11 +295,13 @@ npm run lint         # ESLint
 
 ## בדיקות
 
-מערך בדיקות יחידה עם **Vitest** (`npm test`) — 27 בדיקות המכסות:
+מערך בדיקות יחידה עם **Vitest** (`npm test`) — 46 בדיקות המכסות:
 - `validators` — ולידציה ופורמט מספרי רישוי
 - `value-estimator` — חישוב פחת, רצפת ערך, עונש קילומטראז'
-- `manufacturer-logos` — זיהוי slug יצרן (כולל שמות עם סיומות מדינה)
+- `manufacturer-logos` — זיהוי slug יצרן (התאמת תחילת-מילה, כולל סיומות מדינה)
 - `car-image` — מיפוי modelFamily ל-imagin (C250→c-class וכו')
+- `vehicle-score` — חישוב ציון הרכב 0–100 וניכוי לפי דגלי אזהרה
+- `gearbox` — תווית תיבת הילוכים מהמפרט
 
 ---
 
