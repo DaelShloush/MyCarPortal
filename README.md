@@ -193,6 +193,7 @@ Vercel CDN / Edge
 | **Supabase PostgreSQL** | בסיס נתונים | אחסון כל נתוני המשתמש (רכבים, תזכורות, מסמכים, מועדפים) — מאובטח ב-Row Level Security |
 | **Supabase Storage** | אחסון קבצים | שמירת מסמכי רכב ותמונות מודעות מכירה, עם policies לפי תיקיית המשתמש |
 | **data.gov.il (CKAN API)** | API חיצוני | שליפת נתוני הרכב הרשמיים מ-12 מאגרים ממשלתיים (חינמי, ללא מפתח) — נקרא דרך השרת, לא מהקליינט |
+| **Anthropic Claude (Haiku Vision)** | AI / API חיצוני | זיהוי מספר לוחית מתמונה (OCR) — אופציונלי, מגודר בעלות |
 | **imagin.studio (CGI API)** | API חיצוני | render תמונת רכב דינמית לפי יצרן/דגם/שנה/צבע |
 | **Wikipedia / Wikimedia** | API חיצוני | צילום דגם אמיתי כ-fallback כשאין render ב-imagin |
 | **avto-dev vehicle-logotypes** | API / CDN | לוגו יצרן אמיתי (vl.imgix.net) |
@@ -288,8 +289,19 @@ npm run lint         # ESLint
 | `RESEND_FROM` | אופציונלי | כתובת השולח (ברירת מחדל: `onboarding@resend.dev`) |
 | `CRON_SECRET` | מומלץ | הקשחת `/api/reminders/check` |
 | `NEXT_PUBLIC_IMAGIN_CUSTOMER` | אופציונלי | מפתח imagin (ברירת מחדל: demo חינמי) |
+| `ANTHROPIC_API_KEY` | ל-OCR | זיהוי לוחית מתמונה (Claude Haiku Vision) |
+| `NEXT_PUBLIC_OCR_ENABLED` | ל-OCR | `1` כדי להציג את כפתור הסריקה (רק כשהמפתח הוגדר) |
 
 > ⚠️ סודות לעולם לא נשמרים ב-git (`.env*` ב-`.gitignore`).
+
+### זיהוי לוחית (OCR) — הפעלה ובקרת עלות
+
+הפיצ'ר משתמש ב-Claude Haiku Vision (זול: ~0.4 אגורות לסריקה). הוא **כבוי כברירת מחדל**
+ומופעל רק כש-`ANTHROPIC_API_KEY` + `NEXT_PUBLIC_OCR_ENABLED=1` מוגדרים. שכבות הגנה מפני
+התפרצות עלות: (1) **הגבלת הוצאה ב-Anthropic Console** — התקרה הקשיחה; (2) **מכסה יומית
+גלובלית** של 300 סריקות (`bump_ocr_usage` RPC, דורש `supabase/migrations/004_ai_usage.sql`);
+(3) **הגבלה לפי IP**; (4) הקטנת תמונה ל-512px בצד הלקוח. ללא המפתח — הכפתור מוסתר והאפליקציה
+עובדת רגיל.
 
 ---
 

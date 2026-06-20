@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import { Search } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { validatePlate } from "@/lib/validators";
+import { PlateScanButton, OCR_ENABLED } from "./plate-scan-button";
 
 interface SearchInputProps {
   size?: "md" | "lg";
@@ -25,6 +26,14 @@ export function SearchInput({ size = "lg", className }: SearchInputProps) {
     }
     setError(null);
     router.push(`/search/${result.cleaned}`);
+  }
+
+  // זוהתה לוחית מתמונה — ממלא את השדה ומחפש אוטומטית
+  function onPlateDetected(plate: string) {
+    setValue(plate);
+    setError(null);
+    const result = validatePlate(plate);
+    if (result.valid) router.push(`/search/${result.cleaned}`);
   }
 
   const heightClass = size === "lg" ? "h-14" : "h-12";
@@ -56,6 +65,12 @@ export function SearchInput({ size = "lg", className }: SearchInputProps) {
           aria-invalid={!!error}
           className="plate-text flex-1 bg-transparent border-0 outline-none text-base text-[var(--color-gray-900)] placeholder:text-[var(--color-gray-400)]"
         />
+        {OCR_ENABLED && (
+          <>
+            <PlateScanButton onDetected={onPlateDetected} onError={setError} />
+            <span className="w-px h-6 bg-[var(--color-border)]" aria-hidden="true" />
+          </>
+        )}
         <button
           type="submit"
           className={cn(
