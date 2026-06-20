@@ -7,7 +7,9 @@
 import { useRef, useState } from "react";
 import { Camera, Loader2 } from "lucide-react";
 
-const MAX_DIM = 512; // קצה ארוך מקסימלי לתמונה שנשלחת ל-AI
+// קצה ארוך מקסימלי לתמונה שנשלחת ל-AI. 1000px נותן קריאוּת טובה לצילום אמיתי
+// (שבו הלוחית לרוב חלק קטן מהפריים) — והעלות עדיין זניחה (~0.5 אג' לסריקה).
+const MAX_DIM = 1000;
 
 interface PlateScanButtonProps {
   onDetected: (plate: string) => void;
