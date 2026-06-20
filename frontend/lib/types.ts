@@ -163,13 +163,3 @@ export interface VehicleDocument {
   fileSize: number;
   uploadedAt: string;
 }
-
-export interface Reminder {
-  id: string;
-  vehicleId: string;
-  type: "test" | "insurance" | "custom";
-  title: string;
-  dueDate: string;         // ISO
-  daysLeft: number;
-  tone: "good" | "warn" | "high";
-}

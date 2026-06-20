@@ -18,6 +18,7 @@ const NAV_LINKS = [
   { href: "/dashboard", label: "הרכבים שלי" },
   { href: "/favorites", label: "מועדפים" },
   { href: "/history", label: "היסטוריה" },
+  { href: "/settings", label: "הגדרות" },
 ];
 
 interface NavbarProps {

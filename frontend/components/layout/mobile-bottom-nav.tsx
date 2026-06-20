@@ -3,17 +3,17 @@
 import Link from "next/link";
 import { useState } from "react";
 import { usePathname } from "next/navigation";
-import { Home, Star, Search, Car, Settings } from "lucide-react";
+import { Home, Star, Search, Car, Clock } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { SearchOverlay } from "@/components/domain/search-overlay";
 
 // "בית" מפנה ל-/ (דף הבית האחיד לכולם), ולא ל-/dashboard.
-// "הרכבים שלי" הוא טאב נפרד — לא דף הבית.
+// "הרכבים שלי" הוא טאב נפרד — לא דף הבית. הגדרות זמינות מתפריט ה-navbar.
 const TABS = [
   { href: "/", label: "בית", icon: Home },
   { href: "/dashboard", label: "הרכבים שלי", icon: Car },
   { href: "/favorites", label: "מועדפים", icon: Star },
-  { href: "/settings", label: "הגדרות", icon: Settings },
+  { href: "/history", label: "היסטוריה", icon: Clock },
 ];
 
 export function MobileBottomNav() {
@@ -21,10 +21,10 @@ export function MobileBottomNav() {
   const [searchOpen, setSearchOpen] = useState(false);
 
   // שני טאבים מכל צד, כפתור חיפוש מורם במרכז
-  const [home, vehicles, favorites, settings] = TABS;
+  const [home, vehicles, favorites, history] = TABS;
   const sideTabs = [
     [home, vehicles],
-    [favorites, settings],
+    [favorites, history],
   ];
 
   const renderTab = (tab: (typeof TABS)[number]) => {

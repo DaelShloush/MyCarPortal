@@ -4,7 +4,6 @@ import { Plus, Crown } from "lucide-react";
 import { SiteShell } from "@/components/layout/site-shell";
 import { Button } from "@/components/ui/button";
 import { VehicleCard } from "@/components/domain/vehicle-card";
-import { AlertBanner } from "@/components/domain/alert-banner";
 import { createClient, getUser } from "@/lib/supabase/server";
 import { getManufacturerSlug } from "@/lib/manufacturer-logos";
 import { upgradeToPremiumAction } from "@/app/actions/profile";
@@ -14,19 +13,12 @@ export default async function DashboardPage() {
   const user = await getUser();
   if (!user) return <AuthRequired feature="הרכבים שלך" />;
 
-  const [vehiclesRes, remindersRes, profileRes] = await Promise.all([
+  const [vehiclesRes, profileRes] = await Promise.all([
     supabase
       .from("vehicles")
       .select("*")
       .eq("user_id", user.id)
       .order("added_at", { ascending: false }),
-    supabase
-      .from("reminders")
-      .select("*")
-      .eq("user_id", user.id)
-      .gte("due_date", new Date().toISOString().split("T")[0])
-      .order("due_date", { ascending: true })
-      .limit(5),
     supabase
       .from("profiles")
       .select("name, plan")
@@ -35,7 +27,6 @@ export default async function DashboardPage() {
   ]);
 
   const vehicles = vehiclesRes.data ?? [];
-  const reminders = remindersRes.data ?? [];
   const profile = profileRes.data;
   const userName = profile?.name ?? user.user_metadata?.name ?? user.email?.split("@")[0] ?? "משתמש";
   const isPremium = profile?.plan === "premium";
@@ -44,12 +35,6 @@ export default async function DashboardPage() {
     const due = new Date(dueDateStr);
     const now = new Date();
     return Math.ceil((due.getTime() - now.getTime()) / (1000 * 60 * 60 * 24));
-  }
-
-  function reminderTone(days: number): "info" | "warn" | "high" {
-    if (days <= 14) return "high";
-    if (days <= 30) return "warn";
-    return "info";
   }
 
   return (
@@ -72,29 +57,6 @@ export default async function DashboardPage() {
             </Button>
           </Link>
         </div>
-
-        {/* Reminders */}
-        {reminders.length > 0 && (
-          <section className="mb-8">
-            <h2 className="text-sm font-bold text-[var(--color-text-muted)] mb-3 uppercase tracking-wide">
-              תזכורות פעילות
-            </h2>
-            <div className="space-y-2">
-              {reminders.map((r) => {
-                const days = daysLeft(r.due_date);
-                return (
-                  <AlertBanner
-                    key={r.id}
-                    tone={reminderTone(days)}
-                    title={r.title ?? (r.type === "test" ? "טסט מתקרב" : "ביטוח מתקרב")}
-                    description={`תוקף: ${r.due_date} · ${days} ימים נותרו`}
-                    href={`/vehicle/${r.vehicle_id}`}
-                  />
-                );
-              })}
-            </div>
-          </section>
-        )}
 
         {/* Vehicles */}
         <section>

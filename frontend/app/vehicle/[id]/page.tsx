@@ -4,7 +4,6 @@ import {
   Car,
   Wrench,
   FileText,
-  Bell,
   Pencil,
   Calendar,
   Gauge,
@@ -21,11 +20,9 @@ import { Badge } from "@/components/ui/badge";
 import { Section, InfoRow } from "@/components/ui/section";
 import { ManufacturerLogo } from "@/components/domain/manufacturer-logo";
 import { VehicleImage } from "@/components/domain/vehicle-image";
-import { AlertBanner } from "@/components/domain/alert-banner";
 import { AddServiceDialog } from "@/components/domain/add-service-dialog";
 import { RefreshVehicleButton } from "@/components/domain/refresh-vehicle-button";
 import { DocumentsManager } from "@/components/domain/documents-manager";
-import { RemindersManager } from "@/components/domain/reminders-manager";
 import { SaleAdGenerator } from "@/components/domain/sale-ad-generator";
 import { InsuranceEditor } from "@/components/domain/insurance-editor";
 import { createClient, getUser } from "@/lib/supabase/server";
@@ -65,12 +62,6 @@ function formatDate(dateStr: string | null): string {
   }
 }
 
-function reminderTone(days: number): "info" | "warn" | "high" {
-  if (days <= 14) return "high";
-  if (days <= 30) return "warn";
-  return "info";
-}
-
 export default async function VehicleDetailPage({ params }: VehicleDetailProps) {
   const { id } = await params;
   const supabase = await createClient();
@@ -80,7 +71,7 @@ export default async function VehicleDetailPage({ params }: VehicleDetailProps) 
   if (!user) return <AuthRequired feature="הרכב הזה" />;
 
   // fetch all data in parallel
-  const [vehicleRes, serviceRes, docsRes, remindersRes, profileRes] = await Promise.all([
+  const [vehicleRes, serviceRes, docsRes, profileRes] = await Promise.all([
     supabase
       .from("vehicles")
       .select("*")
@@ -97,12 +88,6 @@ export default async function VehicleDetailPage({ params }: VehicleDetailProps) 
       .select("*")
       .eq("vehicle_id", id)
       .order("uploaded_at", { ascending: false }),
-    supabase
-      .from("reminders")
-      .select("*")
-      .eq("vehicle_id", id)
-      .gte("due_date", new Date().toISOString().split("T")[0])
-      .order("due_date", { ascending: true }),
     supabase.from("profiles").select("plan").eq("id", user.id).single(),
   ]);
 
@@ -133,7 +118,6 @@ export default async function VehicleDetailPage({ params }: VehicleDetailProps) 
   );
   const serviceRecords = serviceRes.data ?? [];
   const documents = docsRes.data ?? [];
-  const reminders = remindersRes.data ?? [];
 
   const totalSpend = serviceRecords.reduce((sum, r) => sum + (r.cost ?? 0), 0);
   const manufacturerSlug = getManufacturerSlug(vehicle.manufacturer ?? "");
@@ -213,26 +197,6 @@ export default async function VehicleDetailPage({ params }: VehicleDetailProps) 
             )}
           </div>
         </div>
-
-        {/* Reminders */}
-        {reminders.length > 0 && (
-          <div className="space-y-2">
-            {reminders.map((r) => {
-              const days = daysLeft(r.due_date);
-              return (
-                <AlertBanner
-                  key={r.id}
-                  tone={reminderTone(days)}
-                  title={
-                    r.title ??
-                    (r.type === "test" ? "טסט מתקרב" : "ביטוח מתקרב")
-                  }
-                  description={`תוקף: ${formatDate(r.due_date)} · ${days} ימים נותרו`}
-                />
-              );
-            })}
-          </div>
-        )}
 
         {/* Stats grid */}
         <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
@@ -399,16 +363,6 @@ export default async function VehicleDetailPage({ params }: VehicleDetailProps) 
             vehicleId={vehicle.id}
             expiryDate={vehicle.insurance_expiry_date ?? null}
             cost={vehicle.insurance_cost ?? null}
-          />
-        </Section>
-
-        {/* Reminders config */}
-        <Section title="תזכורות" icon={<Bell size={16} />} id="reminders">
-          <RemindersManager
-            vehicleId={vehicle.id}
-            initialReminders={reminders}
-            testExpiry={vehicle.test_expiry_date ?? null}
-            insuranceExpiry={vehicle.insurance_expiry_date ?? null}
           />
         </Section>
 

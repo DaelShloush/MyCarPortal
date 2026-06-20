@@ -1,4 +1,4 @@
-import { Crown, Mail, Lock, LogOut, CreditCard, ChevronLeft, CheckCircle, AlertCircle } from "lucide-react";
+import { Crown, Lock, LogOut, CreditCard, ChevronLeft, CheckCircle, AlertCircle } from "lucide-react";
 import { AuthRequired } from "@/components/domain/auth-required";
 import { SiteShell } from "@/components/layout/site-shell";
 import { Card } from "@/components/ui/card";
@@ -150,59 +150,6 @@ export default async function SettingsPage({ searchParams }: SettingsPageProps) 
               </div>
             )}
           </div>
-        </Card>
-
-        {/* Notifications */}
-        <Card>
-          <div className="p-5 border-b border-[var(--color-border)]">
-            <h2 className="font-bold mb-1">התראות</h2>
-            <p className="text-xs text-[var(--color-text-subtle)]">
-              איך נדע אותך לפני שטסט או ביטוח פגים
-            </p>
-          </div>
-          <ul className="divide-y divide-[var(--color-border)]">
-            {[
-              {
-                icon: Mail,
-                title: "התראות אימייל",
-                body: "תזכורות לטסט וביטוח",
-                on: true,
-                premium: false,
-              },
-            ].map((item, i) => {
-              const Icon = item.icon;
-              const active = item.on && (!item.premium || isPremium);
-              return (
-                <li key={i} className="p-5 flex items-center gap-3">
-                  <div className="w-10 h-10 rounded-xl bg-[var(--color-primary-50)] grid place-items-center text-[var(--color-primary-700)]">
-                    <Icon size={20} />
-                  </div>
-                  <div className="flex-1 min-w-0">
-                    <p className="font-bold flex items-center gap-2">
-                      {item.title}
-                      {item.premium && <Badge variant="premium">Premium</Badge>}
-                    </p>
-                    <p className="text-xs text-[var(--color-text-subtle)]">
-                      {item.body}
-                    </p>
-                  </div>
-                  <div
-                    className={`w-11 h-6 rounded-full p-0.5 transition-colors ${
-                      active
-                        ? "bg-[var(--color-primary-500)]"
-                        : "bg-[var(--color-gray-300)]"
-                    }`}
-                  >
-                    <div
-                      className={`w-5 h-5 rounded-full bg-white shadow transition-transform ${
-                        active ? "translate-x-5 rtl:-translate-x-5" : "translate-x-0"
-                      }`}
-                    />
-                  </div>
-                </li>
-              );
-            })}
-          </ul>
         </Card>
 
         {/* Account */}

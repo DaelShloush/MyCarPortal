@@ -36,12 +36,8 @@ export async function SiteShell({ children }: SiteShellProps) {
 
   return (
     <>
-      {/* דילוג לתוכן — קישור ראשון למשתמשי מקלדת/קוראי מסך (CSS: .skip-link) */}
-      <a href="#main" className="skip-link">
-        דלג לתוכן הראשי
-      </a>
       <Navbar initialUser={initialUser} />
-      <main id="main" tabIndex={-1} className="flex-1 pb-20 md:pb-0 outline-none">
+      <main id="main" className="flex-1 pb-20 md:pb-0">
         {children}
       </main>
       <Footer />

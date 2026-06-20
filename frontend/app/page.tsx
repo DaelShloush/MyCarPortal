@@ -3,7 +3,7 @@ import { Suspense } from "react";
 import {
   Wallet,
   Search as SearchIcon,
-  Bell,
+  Camera,
   FileText,
   Star,
   Smartphone,
@@ -28,9 +28,9 @@ const FEATURES = [
     body: "כל הנתונים נשלפים ישירות ממאגרי משרד התחבורה (data.gov.il).",
   },
   {
-    icon: Bell,
-    title: "תזכורות חכמות",
-    body: "טסט וביטוח מתקרבים? תקבל התראת אימייל לפני שתהיה במינוס.",
+    icon: Camera,
+    title: "סריקת לוחית ב-AI",
+    body: "צלם את לוחית הרישוי — והמערכת תזהה את המספר ותחפש אוטומטית.",
   },
   {
     icon: FileText,

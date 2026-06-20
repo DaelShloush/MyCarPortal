@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { Bell, ChevronLeft, FileSearch } from "lucide-react";
+import { ChevronLeft, FileSearch } from "lucide-react";
 import { Card } from "@/components/ui/card";
 import { Progress } from "@/components/ui/progress";
 import { ManufacturerLogo } from "./manufacturer-logo";
@@ -72,7 +72,7 @@ export function VehicleCard({ vehicle }: VehicleCardProps) {
         </div>
       </div>
 
-      <div className="border-t border-[var(--color-border)] grid grid-cols-3 [&>*+*]:border-s [&>*+*]:border-[var(--color-border)]">
+      <div className="border-t border-[var(--color-border)] grid grid-cols-2 [&>*+*]:border-s [&>*+*]:border-[var(--color-border)]">
         <Link
           href={`/vehicle/${vehicle.id}`}
           className="flex items-center justify-center gap-1 py-3 text-sm font-medium text-[var(--color-primary-600)] hover:bg-[var(--color-gray-50)]"
@@ -84,12 +84,6 @@ export function VehicleCard({ vehicle }: VehicleCardProps) {
           className="flex items-center justify-center gap-1 py-3 text-sm font-medium text-[var(--color-gray-700)] hover:bg-[var(--color-gray-50)]"
         >
           <FileSearch size={15} /> דוח מלא
-        </Link>
-        <Link
-          href={`/vehicle/${vehicle.id}#reminders`}
-          className="flex items-center justify-center gap-1 py-3 text-sm font-medium text-[var(--color-gray-700)] hover:bg-[var(--color-gray-50)]"
-        >
-          <Bell size={15} /> תזכורת
         </Link>
       </div>
     </Card>
