@@ -198,6 +198,13 @@ body {
 
 @media (prefers-reduced-motion: reduce) {
   .mcp-drive, .mcp-road, .mcp-dot { animation: none; }
+  /* כיבוד העדפת תנועה מופחתת — מנטרל אנימציות ומעברים (כולל ספינר הסריקה) */
+  *, *::before, *::after {
+    animation-duration: 0.001ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.001ms !important;
+    scroll-behavior: auto !important;
+  }
 }
 
 /* ============================================================
@@ -245,8 +252,21 @@ body {
 }
 
 /* ============================================================
-   Skip link — accessibility
+   Accessibility helpers
    ============================================================ */
+
+/* טקסט לקוראי מסך בלבד — נסתר ויזואלית אך נגיש (aria-live וכו') */
+.sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
+}
 
 .skip-link {
   position: absolute;

@@ -34,7 +34,8 @@ async function downscaleToBase64(file: File): Promise<string> {
   ctx.drawImage(bitmap, 0, 0, w, h);
   bitmap.close();
 
-  const dataUrl = canvas.toDataURL("image/jpeg", 0.7);
+  // איכות גבוהה (0.92) שומרת על קצוות הספרות — קריטי לקריאה מדויקת
+  const dataUrl = canvas.toDataURL("image/jpeg", 0.92);
   return dataUrl.split(",")[1]; // מסיר את הקידומת "data:image/jpeg;base64,"
 }
 
@@ -74,11 +75,12 @@ export function PlateScanButton({ onDetected, onError, className }: PlateScanBut
         type="button"
         onClick={() => inputRef.current?.click()}
         disabled={busy}
-        aria-label="סרוק לוחית רישוי מתמונה"
+        aria-busy={busy}
+        aria-label={busy ? "סורק תמונה לזיהוי מספר רישוי" : "סרוק לוחית רישוי מתמונה"}
         title="סרוק לוחית מתמונה"
         className={
           className ??
-          "shrink-0 w-10 h-10 grid place-items-center rounded-xl text-[var(--color-primary-700)] hover:bg-[var(--color-primary-50)] disabled:opacity-50 transition-colors"
+          "shrink-0 w-10 h-10 grid place-items-center rounded-xl text-[var(--color-primary-700)] hover:bg-[var(--color-primary-50)] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--color-primary-600)] disabled:opacity-50 transition-colors"
         }
       >
         {busy ? <Loader2 size={20} className="animate-spin" /> : <Camera size={20} />}
@@ -91,7 +93,12 @@ export function PlateScanButton({ onDetected, onError, className }: PlateScanBut
         onChange={handleFile}
         className="hidden"
         aria-hidden="true"
+        tabIndex={-1}
       />
+      {/* הכרזה לקוראי מסך על מצב הסריקה */}
+      <span className="sr-only" role="status" aria-live="polite">
+        {busy ? "סורק תמונה, אנא המתן" : ""}
+      </span>
     </>
   );
 }
