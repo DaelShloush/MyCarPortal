@@ -3,14 +3,16 @@
 import Link from "next/link";
 import { useState } from "react";
 import { usePathname } from "next/navigation";
-import { Home, Star, Search, Clock, Settings } from "lucide-react";
+import { Home, Star, Search, Car, Settings } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { SearchOverlay } from "@/components/domain/search-overlay";
 
+// "בית" מפנה ל-/ (דף הבית האחיד לכולם), ולא ל-/dashboard.
+// "הרכבים שלי" הוא טאב נפרד — לא דף הבית.
 const TABS = [
-  { href: "/dashboard", label: "בית", icon: Home },
+  { href: "/", label: "בית", icon: Home },
+  { href: "/dashboard", label: "הרכבים שלי", icon: Car },
   { href: "/favorites", label: "מועדפים", icon: Star },
-  { href: "/history", label: "היסטוריה", icon: Clock },
   { href: "/settings", label: "הגדרות", icon: Settings },
 ];
 
@@ -18,11 +20,11 @@ export function MobileBottomNav() {
   const pathname = usePathname();
   const [searchOpen, setSearchOpen] = useState(false);
 
-  // טאב רגיל משני הצדדים, כפתור חיפוש מורם במרכז
-  const [home, favorites, history, settings] = TABS;
+  // שני טאבים מכל צד, כפתור חיפוש מורם במרכז
+  const [home, vehicles, favorites, settings] = TABS;
   const sideTabs = [
-    [home, favorites],
-    [history, settings],
+    [home, vehicles],
+    [favorites, settings],
   ];
 
   const renderTab = (tab: (typeof TABS)[number]) => {
@@ -39,8 +41,8 @@ export function MobileBottomNav() {
             : "text-[var(--color-gray-500)] hover:text-[var(--color-gray-700)]"
         )}
       >
-        <Icon size={22} />
-        <span>{tab.label}</span>
+        <Icon size={22} className="shrink-0" />
+        <span className="whitespace-nowrap">{tab.label}</span>
         {isActive && (
           <span className="absolute bottom-1 w-1 h-1 rounded-full bg-[var(--color-primary-600)]" />
         )}
