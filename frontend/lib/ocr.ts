@@ -12,6 +12,11 @@ export interface OcrResult {
 
 const MODEL = "claude-haiku-4-5";
 
+// מפתח Anthropic — תומך בשם הסטנדרטי וגם בשם החלופי שהוגדר ב-Vercel.
+export function getAnthropicKey(): string | undefined {
+  return process.env.ANTHROPIC_API_KEY ?? process.env.api_key_claude;
+}
+
 const PROMPT = `בתמונה מופיעה לוחית רישוי ישראלית (רקע צהוב, ספרות שחורות, לעיתים עם פס IL כחול).
 החזר אך ורק את הספרות של מספר הרישוי, ברצף, ללא מקפים, רווחים, אותיות או טקסט נוסף.
 אם אינך מזהה לוחית רישוי ברורה בתמונה, החזר את המילה NONE בלבד.`;
@@ -24,9 +29,9 @@ export async function recognizePlate(
   base64Image: string,
   mediaType: OcrMediaType
 ): Promise<OcrResult> {
-  const apiKey = process.env.ANTHROPIC_API_KEY;
+  const apiKey = getAnthropicKey();
   if (!apiKey) {
-    throw new Error("ANTHROPIC_API_KEY missing");
+    throw new Error("Anthropic API key missing");
   }
 
   const client = new Anthropic({ apiKey });

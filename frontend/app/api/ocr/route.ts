@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { createClient } from "@supabase/supabase-js";
-import { recognizePlate, type OcrMediaType } from "@/lib/ocr";
+import { recognizePlate, getAnthropicKey, type OcrMediaType } from "@/lib/ocr";
 
 // ════════════════════════════════════════════════════════════
 // זיהוי לוחית רישוי מתמונה — Claude Haiku Vision, מגודר בעלות.
@@ -65,7 +65,7 @@ async function checkDailyCap(): Promise<{ ok: boolean; reason?: string }> {
 
 export async function POST(req: NextRequest) {
   // אין מפתח AI מוגדר → הפיצ'ר כבוי בעדינות (הקליינט יסתיר את הכפתור ממילא)
-  if (!process.env.ANTHROPIC_API_KEY) {
+  if (!getAnthropicKey()) {
     return NextResponse.json(
       { error: "זיהוי תמונה אינו זמין כרגע. אפשר להקליד את המספר ידנית." },
       { status: 503 }
